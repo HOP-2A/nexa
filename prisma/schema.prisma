@@ -6,10 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Status {
-  STUDENT
-  PRESIDENT
-}
 
 enum Ratings {
   FIVE
@@ -17,6 +13,7 @@ enum Ratings {
   THREE
   TWO
   ONE
+  NONE
 }
 
 enum EventStatus {
@@ -45,10 +42,10 @@ model Student {
   email         String          @unique
   clubs         Club[]          
   createdAt     DateTime        @default(now())
-  status        Status
+
   presiding     Club[]          @relation("ClubPresident")
   profilePic    String?
-  class         String
+
   phone         String?
   mentorStudent MentorStudent[]
   applications  ClubForm[]
@@ -73,9 +70,9 @@ model Mentor {
   lastname        String
   email           String          @unique
   clerkId         String          @unique
-  rating          Ratings
+  rating          Ratings         @default(NONE)
   bio             String?
-  subject         String
+ 
   description     String?
   profilePic      String?
   experienceYears String?
