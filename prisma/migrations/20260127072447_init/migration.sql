@@ -106,11 +106,11 @@ CREATE TABLE "ClubForm" (
 );
 
 -- CreateTable
-CREATE TABLE "_ClubMembers" (
+CREATE TABLE "_ClubToStudent" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL,
 
-    CONSTRAINT "_ClubMembers_AB_pkey" PRIMARY KEY ("A","B")
+    CONSTRAINT "_ClubToStudent_AB_pkey" PRIMARY KEY ("A","B")
 );
 
 -- CreateIndex
@@ -126,7 +126,7 @@ CREATE UNIQUE INDEX "Mentor_email_key" ON "Mentor"("email");
 CREATE UNIQUE INDEX "Mentor_clerkId_key" ON "Mentor"("clerkId");
 
 -- CreateIndex
-CREATE INDEX "_ClubMembers_B_index" ON "_ClubMembers"("B");
+CREATE INDEX "_ClubToStudent_B_index" ON "_ClubToStudent"("B");
 
 -- AddForeignKey
 ALTER TABLE "Club" ADD CONSTRAINT "Club_presidentId_fkey" FOREIGN KEY ("presidentId") REFERENCES "Student"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -147,7 +147,7 @@ ALTER TABLE "ClubForm" ADD CONSTRAINT "ClubForm_clubId_fkey" FOREIGN KEY ("clubI
 ALTER TABLE "ClubForm" ADD CONSTRAINT "ClubForm_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "Student"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_ClubMembers" ADD CONSTRAINT "_ClubMembers_A_fkey" FOREIGN KEY ("A") REFERENCES "Club"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_ClubToStudent" ADD CONSTRAINT "_ClubToStudent_A_fkey" FOREIGN KEY ("A") REFERENCES "Club"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_ClubMembers" ADD CONSTRAINT "_ClubMembers_B_fkey" FOREIGN KEY ("B") REFERENCES "Student"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_ClubToStudent" ADD CONSTRAINT "_ClubToStudent_B_fkey" FOREIGN KEY ("B") REFERENCES "Student"("id") ON DELETE CASCADE ON UPDATE CASCADE;

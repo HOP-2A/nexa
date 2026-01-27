@@ -1,13 +1,16 @@
+"use client"
+import { SignInButton } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+
 const Page = () => {
+  const router = useRouter()
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white text-gray-800">
       <nav className="flex items-center justify-between max-w-7xl mx-auto px-6 sm:px-4 py-4">
         <div className="text-2xl font-bold text-blue-600">NEXA</div>
         <div className="flex gap-3">
-          <button className="px-4 py-2 rounded-lg text-blue-600 border border-blue-600 hover:bg-blue-50 transition">
-            Log in
-          </button>
-          <button className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
+         <SignInButton/>
+          <button className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition" onClick={()=>{router.push("/signup")}}>
             Sign up
           </button>
         </div>
@@ -28,7 +31,7 @@ const Page = () => {
             Get Started
           </button>
           <button className="px-6 py-3 rounded-xl border border-gray-300 text-lg hover:bg-gray-100 transition">
-            Log in
+            <SignInButton/>
           </button>
         </div>
       </section>
