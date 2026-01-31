@@ -48,6 +48,7 @@ model Mentor {
   profilePic      String?
   experienceYears String?
   mentorStudent   MentorStudent[]
+  courses         Course[]
 }
 
 model ClubEvent {
@@ -101,6 +102,16 @@ model ClubToStudents {
   Student   Student @relation(fields: [studentId], references: [id])
 
   @@unique([studentId, clubId])
+}
+
+model Course {
+  id           String   @id @default(nanoid())
+  mentorId     String
+  mentor       Mentor   @relation(fields: [mentorId], references: [id])
+  createdAt    DateTime @default(now())
+  paymentValue String
+  courseTitle  String
+  courseInfo   String
 }
 
 enum Ratings {
