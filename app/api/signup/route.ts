@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(createdUser);
   }
 
+
   if (role === "STUDENT") {
     const createdUser = await prisma.student.create({
       data: {
