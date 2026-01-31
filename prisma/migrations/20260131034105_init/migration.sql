@@ -1,8 +1,5 @@
 -- CreateEnum
-CREATE TYPE "Status" AS ENUM ('STUDENT', 'PRESIDENT');
-
--- CreateEnum
-CREATE TYPE "Ratings" AS ENUM ('FIVE', 'FOUR', 'THREE', 'TWO', 'ONE');
+CREATE TYPE "Ratings" AS ENUM ('FIVE', 'FOUR', 'THREE', 'TWO', 'ONE', 'NONE');
 
 -- CreateEnum
 CREATE TYPE "EventStatus" AS ENUM ('NEW', 'PASSED', 'CANCELLED');
@@ -21,9 +18,7 @@ CREATE TABLE "Student" (
     "clerkId" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "status" "Status" NOT NULL,
     "profilePic" TEXT,
-    "class" TEXT NOT NULL,
     "phone" TEXT,
 
     CONSTRAINT "Student_pkey" PRIMARY KEY ("id")
@@ -48,9 +43,8 @@ CREATE TABLE "Mentor" (
     "lastname" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "clerkId" TEXT NOT NULL,
-    "rating" "Ratings" NOT NULL,
+    "rating" "Ratings" NOT NULL DEFAULT 'NONE',
     "bio" TEXT,
-    "subject" TEXT NOT NULL,
     "description" TEXT,
     "profilePic" TEXT,
     "experienceYears" TEXT,
@@ -106,6 +100,27 @@ CREATE TABLE "ClubForm" (
 );
 
 -- CreateTable
+CREATE TABLE "ClubToStudents" (
+    "id" TEXT NOT NULL,
+    "studentId" TEXT NOT NULL,
+    "clubId" TEXT NOT NULL,
+
+    CONSTRAINT "ClubToStudents_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Course" (
+    "id" TEXT NOT NULL,
+    "mentorId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "paymentValue" TEXT NOT NULL,
+    "courseTitle" TEXT NOT NULL,
+    "courseInfo" TEXT NOT NULL,
+
+    CONSTRAINT "Course_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_ClubToStudent" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL,
@@ -126,6 +141,9 @@ CREATE UNIQUE INDEX "Mentor_email_key" ON "Mentor"("email");
 CREATE UNIQUE INDEX "Mentor_clerkId_key" ON "Mentor"("clerkId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ClubToStudents_studentId_clubId_key" ON "ClubToStudents"("studentId", "clubId");
+
+-- CreateIndex
 CREATE INDEX "_ClubToStudent_B_index" ON "_ClubToStudent"("B");
 
 -- AddForeignKey
@@ -135,16 +153,25 @@ ALTER TABLE "Club" ADD CONSTRAINT "Club_presidentId_fkey" FOREIGN KEY ("presiden
 ALTER TABLE "ClubEvent" ADD CONSTRAINT "ClubEvent_clubId_fkey" FOREIGN KEY ("clubId") REFERENCES "Club"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "MentorStudent" ADD CONSTRAINT "MentorStudent_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "Student"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "MentorStudent" ADD CONSTRAINT "MentorStudent_mentorId_fkey" FOREIGN KEY ("mentorId") REFERENCES "Mentor"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "MentorStudent" ADD CONSTRAINT "MentorStudent_mentorId_fkey" FOREIGN KEY ("mentorId") REFERENCES "Mentor"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "MentorStudent" ADD CONSTRAINT "MentorStudent_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "Student"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ClubForm" ADD CONSTRAINT "ClubForm_clubId_fkey" FOREIGN KEY ("clubId") REFERENCES "Club"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ClubForm" ADD CONSTRAINT "ClubForm_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "Student"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ClubToStudents" ADD CONSTRAINT "ClubToStudents_clubId_fkey" FOREIGN KEY ("clubId") REFERENCES "Club"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ClubToStudents" ADD CONSTRAINT "ClubToStudents_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "Student"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Course" ADD CONSTRAINT "Course_mentorId_fkey" FOREIGN KEY ("mentorId") REFERENCES "Mentor"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_ClubToStudent" ADD CONSTRAINT "_ClubToStudent_A_fkey" FOREIGN KEY ("A") REFERENCES "Club"("id") ON DELETE CASCADE ON UPDATE CASCADE;
