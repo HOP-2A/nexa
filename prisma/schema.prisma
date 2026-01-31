@@ -6,6 +6,102 @@ datasource db {
   provider = "postgresql"
 }
 
+model Student {
+  id             String           @id @default(nanoid())
+  firstname      String
+  lastname       String
+  clerkId        String           @unique
+  email          String           @unique
+  createdAt      DateTime         @default(now())
+  profilePic     String?
+  phone          String?
+  presiding      Club[]           @relation("ClubPresident")
+  applications   ClubForm[]
+  clubToStudents ClubToStudents[]
+  mentorStudent  MentorStudent[]
+  clubs          Club[]           @relation("ClubToStudent")
+}
+
+model Club {
+  id             String           @id @default(nanoid())
+  name           String
+  createdAt      DateTime         @default(now())
+  description    String
+  code           String
+  presidentId    String?
+  president      Student?         @relation("ClubPresident", fields: [presidentId], references: [id])
+  events         ClubEvent[]      @relation("ClubEvents")
+  applications   ClubForm[]
+  clubToStudents ClubToStudents[]
+  students       Student[]        @relation("ClubToStudent")
+}
+
+model Mentor {
+  id              String          @id @default(nanoid())
+  firstname       String
+  lastname        String
+  email           String          @unique
+  clerkId         String          @unique
+  rating          Ratings         @default(NONE)
+  bio             String?
+  description     String?
+  profilePic      String?
+  experienceYears String?
+  mentorStudent   MentorStudent[]
+}
+
+model ClubEvent {
+  eventId      String      @id @default(nanoid())
+  clubId       String
+  title        String
+  description  String
+  startingAt   DateTime
+  endingAt     DateTime?
+  createdAt    DateTime    @default(now())
+  location     String?
+  onlineLink   String?
+  capacity     Int?
+  status       EventStatus
+  participants String[]
+  club         Club        @relation("ClubEvents", fields: [clubId], references: [id])
+}
+
+model MentorStudent {
+  id        String           @id @default(nanoid())
+  studentId String
+  mentorId  String
+  createdAt DateTime         @default(now())
+  status    MentorshipStatus
+  Mentor    Mentor           @relation(fields: [mentorId], references: [id])
+  Student   Student          @relation(fields: [studentId], references: [id])
+}
+
+model ClubForm {
+  id                String            @id @default(nanoid())
+  clubId            String
+  studentId         String
+  status            ApplicationStatus @default(PENDING)
+  message           String?
+  submittedAt       DateTime          @default(now())
+  age               Int?
+  class             String?
+  personalStatement String?
+  experience        String?
+  skills            String?
+  whyThisClub       String?
+  club              Club              @relation(fields: [clubId], references: [id])
+  student           Student           @relation(fields: [studentId], references: [id])
+}
+
+model ClubToStudents {
+  id        String  @id @default(nanoid())
+  studentId String
+  clubId    String
+  Club      Club    @relation(fields: [clubId], references: [id])
+  Student   Student @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, clubId])
+}
 
 enum Ratings {
   FIVE
@@ -32,92 +128,4 @@ enum ApplicationStatus {
   PENDING
   ACCEPTED
   REJECTED
-}
-
-model Student {
-  id            String          @id @default(nanoid())
-  firstname     String
-  lastname      String
-  clerkId       String          @unique
-  email         String          @unique
-  clubs         Club[]          
-  createdAt     DateTime        @default(now())
-
-  presiding     Club[]          @relation("ClubPresident")
-  profilePic    String?
-
-  phone         String?
-  mentorStudent MentorStudent[]
-  applications  ClubForm[]
-}
-
-model Club {
-  id           String      @id @default(nanoid())
-  name         String
-  createdAt    DateTime    @default(now())
-  description  String
-  code         String
-  students     Student[]   
-  presidentId  String?
-  president    Student?    @relation("ClubPresident", fields: [presidentId], references: [id])
-  events       ClubEvent[] @relation("ClubEvents")
-  applications ClubForm[]
-}
-
-model Mentor {
-  id              String          @id @default(nanoid())
-  firstname       String
-  lastname        String
-  email           String          @unique
-  clerkId         String          @unique
-  rating          Ratings         @default(NONE)
-  bio             String?
- 
-  description     String?
-  profilePic      String?
-  experienceYears String?
-  mentorStudent   MentorStudent[]
-}
-
-model ClubEvent {
-  eventId      String      @id @default(nanoid())
-  clubId       String
-  club         Club        @relation("ClubEvents", fields: [clubId], references: [id])
-  title        String
-  description  String
-  startingAt   DateTime
-  endingAt     DateTime?
-  createdAt    DateTime    @default(now())
-  location     String?
-  onlineLink   String?
-  capacity     Int?
-  status       EventStatus
-  participants String[]
-}
-
-model MentorStudent {
-  id        String           @id @default(nanoid())
-  studentId String
-  mentorId  String
-  Student   Student          @relation(fields: [studentId], references: [id])
-  Mentor    Mentor           @relation(fields: [mentorId], references: [id])
-  createdAt DateTime         @default(now())
-  status    MentorshipStatus
-}
-
-model ClubForm {
-  id                String            @id @default(nanoid())
-  clubId            String
-  studentId         String
-  club              Club              @relation(fields: [clubId], references: [id])
-  student           Student           @relation(fields: [studentId], references: [id])
-  status            ApplicationStatus @default(PENDING)
-  message           String?
-  submittedAt       DateTime          @default(now())
-  age               Int?
-  class             String?
-  personalStatement String?
-  experience        String?
-  skills            String?
-  whyThisClub       String?
 }
