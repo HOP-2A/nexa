@@ -34,7 +34,6 @@ export async function POST(req: Request) {
   const firstName = user.first_name || "";
   const lastName = user.last_name || "";
 
-  /* ------------------------- USER CREATED ------------------------ */
   if (eventType === "user.created") {
     if ((user.public_metadata.role = "MENTOR"))
       await prisma.mentor.create({
