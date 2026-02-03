@@ -9,7 +9,8 @@ export async function GET(
   const students = await prisma.student.findUnique({
     where: { clerkId },
   });
-  if(!students){
+
+  if (!students) {
     const mentor = await prisma.mentor.findUnique({
       where: { clerkId },
     });
@@ -17,6 +18,4 @@ export async function GET(
   }
 
   return NextResponse.json(students);
-
-
 }

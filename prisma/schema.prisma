@@ -1,11 +1,11 @@
 generator client {
   provider = "prisma-client-js"
 }
-
+ 
 datasource db {
   provider = "postgresql"
 }
-
+ 
 model Student {
   id             String           @id @default(nanoid())
   firstname      String
@@ -21,7 +21,7 @@ model Student {
   mentorStudent  MentorStudent[]
   clubs          Club[]           @relation("ClubToStudent")
 }
-
+ 
 model Club {
   id             String           @id @default(nanoid())
   name           String
@@ -35,7 +35,7 @@ model Club {
   clubToStudents ClubToStudents[]
   students       Student[]        @relation("ClubToStudent")
 }
-
+ 
 model Mentor {
   id              String          @id @default(nanoid())
   firstname       String
@@ -48,8 +48,9 @@ model Mentor {
   profilePic      String?
   experienceYears String?
   mentorStudent   MentorStudent[]
+  courses         Course[]
 }
-
+ 
 model ClubEvent {
   eventId      String      @id @default(nanoid())
   clubId       String
@@ -65,7 +66,7 @@ model ClubEvent {
   participants String[]
   club         Club        @relation("ClubEvents", fields: [clubId], references: [id])
 }
-
+ 
 model MentorStudent {
   id        String           @id @default(nanoid())
   studentId String
@@ -75,7 +76,7 @@ model MentorStudent {
   Mentor    Mentor           @relation(fields: [mentorId], references: [id])
   Student   Student          @relation(fields: [studentId], references: [id])
 }
-
+ 
 model ClubForm {
   id                String            @id @default(nanoid())
   clubId            String
@@ -92,17 +93,27 @@ model ClubForm {
   club              Club              @relation(fields: [clubId], references: [id])
   student           Student           @relation(fields: [studentId], references: [id])
 }
-
+ 
 model ClubToStudents {
   id        String  @id @default(nanoid())
   studentId String
   clubId    String
   Club      Club    @relation(fields: [clubId], references: [id])
   Student   Student @relation(fields: [studentId], references: [id])
-
+ 
   @@unique([studentId, clubId])
 }
-
+ 
+model Course {
+  id           String   @id @default(nanoid())
+  mentorId     String
+  mentor       Mentor   @relation(fields: [mentorId], references: [id])
+  createdAt    DateTime @default(now())
+  paymentValue String
+  courseTitle  String
+  courseInfo   String
+}
+ 
 enum Ratings {
   FIVE
   FOUR
@@ -111,19 +122,19 @@ enum Ratings {
   ONE
   NONE
 }
-
+ 
 enum EventStatus {
   NEW
   PASSED
   CANCELLED
 }
-
+ 
 enum MentorshipStatus {
   ACTIVE
   PAUSED
   PENDING
 }
-
+ 
 enum ApplicationStatus {
   PENDING
   ACCEPTED
