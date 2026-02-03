@@ -30,9 +30,9 @@ const Page = () => {
           <button className="px-6 py-3 rounded-xl bg-blue-600 text-white text-lg hover:bg-blue-700 transition">
             Get Started
           </button>
-          <button className="px-6 py-3 rounded-xl border border-gray-300 text-lg hover:bg-gray-100 transition">
-            <SignInButton/>
-          </button>
+       
+            <SignInButton />
+
         </div>
       </section>
       <section className="relative max-w-7xl mx-auto px-6 sm:px-4 py-16 rounded mb-3 bg-blue-50 overflow-hidden">
