@@ -3,7 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { clubId: string } },
+  {
+    params,
+  }: {
+    params: Promise<{ clubId: string }>;
+  },
 ) {
   const { clubId } = await params;
 
