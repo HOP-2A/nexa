@@ -40,16 +40,13 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider
- 
-    signInForceRedirectUrl="/student/dashboard"
-    signUpForceRedirectUrl="/student/dashboard">
+      signInForceRedirectUrl="/student/dashboard"
+      signUpForceRedirectUrl="/student/dashboard"
+    >
       <html lang="en">
-        <body
-        >
+        <body>
           <header className="flex justify-end items-center p-4 gap-4 h-16">
-            <SignedOut>
-             
-            </SignedOut>
+            <SignedOut></SignedOut>
             <SignedIn>
               <UserButton />
             </SignedIn>
