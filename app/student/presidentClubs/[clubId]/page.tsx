@@ -2,7 +2,7 @@
 
 import { useUser } from "@clerk/nextjs";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -55,6 +55,11 @@ const Page = () => {
   const clubId = params.clubId as string;
   const [club, setClub] = useState<ClubType | null>(null);
   const { isLoaded, isSignedIn, user } = useUser();
+  const [reason, setReason] = useState("");
+  const [inviteInput, setInvite] = useState({
+    email: "",
+    code: "",
+  });
   const [inputs, setInputs] = useState({
     title: "",
     description: "",
@@ -63,6 +68,16 @@ const Page = () => {
     endingAt: "",
     capacity: "",
   });
+
+  const HandleReason = (e: ChangeEvent<HTMLInputElement>) => {
+    setReason(e.target.value);
+  };
+
+  const HandleInvites = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setInvite((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -119,7 +134,39 @@ const Page = () => {
     }
   };
 
-  console.log(inputs);
+  const DeleteStudent = async (id: string) => {
+    const res = await fetch("/api/club-management/delete-student", {
+      method: "DELETE",
+      body: JSON.stringify({
+        studentId: id,
+        reason: reason,
+        clubId: clubId,
+      }),
+    });
+
+    if (res.ok) {
+      toast.success("Successfully deleted student");
+    }
+  };
+
+  const Invite = async () => {
+    const res = await fetch("/api/club-management/invite", {
+      method: "POST",
+      body: JSON.stringify({
+        code: inviteInput.code,
+        email: inviteInput.email,
+        clerk: user?.id,
+      }),
+    });
+
+    if (res.ok) {
+      toast.success("Successfully invited");
+      setInvite({ email: "", code: "" });
+    } else {
+      toast.error("Something went wrong, please proof read");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-blue-50 px-6 py-8">
       <div className="max-w-4xl mx-auto">
@@ -208,15 +255,105 @@ const Page = () => {
                   <div className="text-sm font-medium text-gray-900">
                     {el?.Student?.firstname || "-"}{" "}
                     <span className="text-gray-500 font-normal">
-                      {el?.Student?.lastname || "-"}
+                      {el?.Student?.clerkId === user?.id
+                        ? "President/You"
+                        : el?.Student?.lastname || "-"}
                     </span>
                   </div>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button
+                        className="px-2 py-1 text-xs font-medium bg-white border border-gray-100 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 shadow-sm transition select-none"
+                        aria-label="Action"
+                      >
+                        Action
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>
+                          Delete student or See student info
+                        </DialogTitle>
+                        <DialogDescription>Danger zone!</DialogDescription>
+                      </DialogHeader>
+                      <form className="space-y-4">
+                        <div>
+                          <label className="block text-gray-700 mb-1">
+                            Student Info
+                          </label>
+                          <div className="flex gap-2">
+                            <label className="block text-gray-700 text-sm mb-1">
+                              Firstname
+                            </label>
+                            <div className="block text-sm mb-1">
+                              {" "}
+                              {el?.Student?.firstname}
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <label className="block text-gray-700 text-sm mb-1">
+                              Lastname
+                            </label>
+                            <div className="block text-sm mb-1">
+                              {" "}
+                              {el?.Student?.lastname}
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <label className="block text-gray-700 text-sm mb-1">
+                              Email
+                            </label>
+                            <div className="block text-sm mb-1">
+                              {" "}
+                              {el?.Student?.email}
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <label className="block text-gray-700 text-sm mb-1">
+                              Phone
+                            </label>
+                            <div className="block text-sm mb-1">
+                              {" "}
+                              {el?.Student?.phone || "not provided"}
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-1">
+                            Reason for removing this student from the club:
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Enter text..."
+                            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            value={reason}
+                            onChange={HandleReason}
+                          />
+                        </div>
+                        <div className="flex justify-end space-x-2 mt-2">
+                          <DialogClose asChild>
+                            <button className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">
+                              Cancel
+                            </button>
+                          </DialogClose>
+                          <button
+                            type="submit"
+                            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                            onClick={() => {
+                              DeleteStudent(el?.Student?.id);
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               ))}
             </div>
           </div>
         </section>
-
         <section className="mt-6">
           <div className="py-3 px-6 bg-white rounded-lg shadow-sm w-full sm:w-fit">
             <div className="flex justify-between items-center mb-3">
@@ -386,6 +523,54 @@ const Page = () => {
                 <div className="text-gray-400 text-sm">No upcoming events</div>
               )}
             </div>
+          </div>
+        </section>
+        <section className="mt-6 bg-white p-4 rounded-lg shadow-sm max-w-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-900 mr-1">
+              Invite Student
+            </h3>
+            <p className="text-xs text-gray-500">Quick invite via email</p>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-gray-700 text-xs font-medium mb-1">
+                Club Code
+              </label>
+              <input
+                type="text"
+                placeholder="****"
+                name="code"
+                value={inviteInput.code}
+                onChange={(e) => {
+                  HandleInvites(e);
+                }}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 text-xs font-medium mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={inviteInput.email}
+                onChange={(e) => {
+                  HandleInvites(e);
+                }}
+                placeholder="john@example.com"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <button
+              onClick={() => {
+                Invite();
+              }}
+              className="w-full px-3 py-1.5 bg-blue-500 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-blue-700 transition"
+            >
+              Send Invite
+            </button>
           </div>
         </section>
       </div>

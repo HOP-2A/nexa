@@ -1,0 +1,25 @@
+import prisma from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
+
+export async function GET(
+  req: NextRequest,
+  {
+    params,
+  }: {
+    params: Promise<{ studentId: string }>;
+  },
+) {
+  const { studentId } = await params;
+  const student = await prisma.student.findFirst({
+    where: {
+      id: studentId,
+    },
+  });
+  const invites = await prisma.invites.findMany({
+    where: {
+      studentEmail: student?.email,
+    },
+  });
+
+  return NextResponse.json(invites);
+}
