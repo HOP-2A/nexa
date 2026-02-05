@@ -74,10 +74,18 @@ type ClubsType = {
   };
 };
 
+type Invite = {
+  id: string;
+  studentEmail: string;
+  inviterId: string;
+  code: string;
+};
+
 const Page = () => {
   const { isLoaded, isSignedIn, user } = useUser();
   const [student, setStudent] = useState<StudentType | null>(null);
   const [clubs, setClubs] = useState<ClubsType[] | null | undefined>(null);
+  const [invites, setInvites] = useState<Invite[] | []>([]);
   const { push } = useRouter();
   const [inputs, setInputs] = useState({
     name: "",
@@ -97,6 +105,16 @@ const Page = () => {
       }
     };
     fetchStudentInfo();
+
+    const fetchInvites = async () => {
+      const res = await fetch(`/api/student/invites/${student?.id}`);
+
+      if (res.ok) {
+        const data = await res.json();
+        setInvites(data);
+      }
+    };
+    fetchInvites();
   }, [isLoaded, user]);
 
   useEffect(() => {
@@ -253,6 +271,11 @@ const Page = () => {
               </form>
             </DialogContent>
           </Dialog>
+
+          <div className="p-4 bg-white rounded-lg shadow-sm">
+            <div className="text-gray-500 text-sm">Invites Inbox</div>
+            <div className="text-xl font-bold">{invites?.length}</div>
+          </div>
         </div>
 
         <div className="py-3 px-6 pl-6 pr-7 bg-white rounded-lg shadow-sm w-fit">
