@@ -1,5 +1,14 @@
 "use client"
+import * as React from "react"
 import { Calendar } from "@/components/ui/calendar"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group"
+import { Clock2Icon } from "lucide-react"
 import SideBar from "@/app/_component/sideBar"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -10,9 +19,15 @@ import {
     CarouselNext,
     CarouselPrevious,
   } from "@/components/ui/carousel";
-import React from "react"
+
 const Page = ()=>{
-  const [date, setDate] = React.useState<Date | undefined>(new Date())
+    const [date, setDate] = React.useState<Date | undefined>(
+    new Date(new Date().getFullYear(), new Date().getMonth(), 12)
+  )
+  const [timeDate, setTimeDate] =useState({
+    startTime :"",
+    endTime:""
+  })
 
 
     const [mentor, setMentor] = useState()
@@ -40,6 +55,18 @@ fetchMentorId()
 mentorsCourses()
     },[])
     console.log(date)
+    const time = (e: { target: { value: any; name: any } })=>{
+      const {value, name} = e.target
+      if(name==="startTime"){
+setTimeDate({...timeDate, startTime:value})
+      }
+      if(name==="endTime"){
+        setTimeDate({...timeDate,endTime:value})
+              }
+
+
+    }
+    console.log(timeDate)
     return (
         <div className="min-h-screen bg-slate-50 md:flex">
           
@@ -91,12 +118,54 @@ mentorsCourses()
 
                 </div>
               </div>
-              <Calendar
-    mode="single"
-    selected={date}
-    onSelect={setDate}
-    className="rounded-lg border"
-  />
+              <Card size="sm" className="mx-auto w-fit">
+      <CardContent>
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={setDate}
+          className="p-0"
+        />
+      </CardContent>
+      <CardFooter className="bg-card border-t">
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="time-from">Start Time</FieldLabel>
+            <InputGroup>
+              <InputGroupInput
+              onChange={time}
+              name="startTime"
+                id="time-from"
+                type="time"
+                step="1"
+                defaultValue="10:30:00"
+                className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+              />
+              <InputGroupAddon>
+                <Clock2Icon className="text-muted-foreground" />
+              </InputGroupAddon>
+            </InputGroup>
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="time-to">End Time</FieldLabel>
+            <InputGroup>
+              <InputGroupInput
+                 onChange={time}
+              name="endTime"
+                id="time-to"
+                type="time"
+                step="1"
+                defaultValue="12:30:00"
+                className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+              />
+              <InputGroupAddon>
+                <Clock2Icon className="text-muted-foreground" />
+              </InputGroupAddon>
+            </InputGroup>
+          </Field>
+        </FieldGroup>
+      </CardFooter>
+    </Card>
     
             </main>
           </div>

@@ -24,9 +24,13 @@ const Page = () => {
     const datas = await data.json()
     setMentor(datas)
   }
+
   useEffect(()=>{
 findAllmentors()
-  },[])
+if(clerkUser?.publicMetadata.role === "MENTOR"){
+  push("/mentor/dashboard")
+}
+  },[user])
   console.log(mentors)
   return (
     <div className="min-h-screen bg-slate-50 md:flex">
@@ -52,7 +56,7 @@ findAllmentors()
                     className="basis-[80%] sm:basis-1/2 md:basis-1/3 lg:basis-1/4 p-2"
                   >
                     <div className="bg-slate-100 rounded-xl p-6 text-center font-semibold" onClick={()=>{
-                      push(`/mentor/${ment.id}`)
+                      push(`/student/mentorProfile/${ment.id}`)
                     }}>
                       {ment.firstname}
                     </div>

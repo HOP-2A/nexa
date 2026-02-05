@@ -3,10 +3,11 @@
 import { Mentor } from "@prisma/client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
   const [mentors, setMentors] = useState<Mentor[]>([]);
-
+ const {push} = useRouter()
   useEffect(() => {
     const fetchMentors = async () => {
       const res = await fetch("/api/mentorGet");
@@ -24,11 +25,16 @@ const Page = () => {
         List of Mentors
       </h1>
 
-      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" 
+ 
+      >
         {mentors.map((mentor) => (
           <div
             key={mentor.id}
             className="flex flex-col items-center rounded-xl bg-white p-6 shadow-md transition hover:shadow-lg"
+            onClick={()=>{
+              push(`/student/mentorProfile/${mentor.id}`)
+            }}
           >
             
             <div className="relative mb-4 h-24 w-24 overflow-hidden rounded-full border">
