@@ -1,4 +1,4 @@
-import  prisma  from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { clerkClient } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 export const GET = () => {
@@ -7,9 +7,9 @@ export const GET = () => {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { firstname,lastname, email, password, role } = body;
+  const { firstname, lastname, email, password, role } = body;
 
-  const existingMentor= await prisma.mentor.findFirst({
+  const existingMentor = await prisma.mentor.findFirst({
     where: {
       email: email,
     },
@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
   }
 
   const clerk = await clerkClient();
+
   const createdClerkUser = await clerk.users.createUser({
     skipPasswordChecks: true,
     skipPasswordRequirement: true,
@@ -42,9 +43,8 @@ export async function POST(req: NextRequest) {
       data: {
         clerkId: createdClerkUser.id,
         email,
-        firstname:firstname,
-        lastname:lastname,
-        
+        firstname: firstname,
+        lastname: lastname,
       },
     });
     return NextResponse.json(createdUser);
@@ -56,8 +56,8 @@ export async function POST(req: NextRequest) {
       data: {
         clerkId: createdClerkUser.id,
         email,
-        firstname:firstname,
-        lastname:lastname,
+        firstname: firstname,
+        lastname: lastname,
       },
     });
 
