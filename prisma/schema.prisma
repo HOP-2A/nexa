@@ -115,7 +115,7 @@ model Course {
 }
 
 model Invites {
-  id           String @id @default(nanoid())
+  id           String  @id @default(nanoid())
   studentEmail String
   code         String
   inviterId    String

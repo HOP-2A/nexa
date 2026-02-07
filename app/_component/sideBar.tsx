@@ -1,47 +1,70 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Home, Users, Newspaper, User, Menu, X } from "lucide-react"
+import { useState } from "react";
+import { Home, Users, Newspaper, User, Menu, X } from "lucide-react";
 
 type PropsType = {
-  home: () => void
-  members: () => void
-  news: () => void
-  account: () => void
-}
+  home: () => void;
+  members: () => void;
+  news: () => void;
+  account: () => void;
+};
 
 const SideBar = ({ home, members, news, account }: PropsType) => {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   const baseBtn =
-    "flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium"
+    "flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium";
 
-  const idle =
-    "text-gray-600 hover:bg-gray-100 hover:text-black"
+  const idle = "text-gray-600 hover:bg-gray-100 hover:text-black";
 
   const NavButtons = () => (
     <>
-      <button onClick={() => { home(); setOpen(false) }} className={`${baseBtn} ${idle}`}>
+      <button
+        onClick={() => {
+          home();
+          setOpen(false);
+        }}
+        className={`${baseBtn} ${idle}`}
+      >
         <Home size={18} />
         Home
       </button>
 
-      <button onClick={() => { members(); setOpen(false) }} className={`${baseBtn} ${idle}`}>
+      <button
+        onClick={() => {
+          members();
+          setOpen(false);
+        }}
+        className={`${baseBtn} ${idle}`}
+      >
         <Users size={18} />
-       Mentors
+        Mentors
       </button>
 
-      <button onClick={() => { news(); setOpen(false) }} className={`${baseBtn} ${idle}`}>
+      <button
+        onClick={() => {
+          news();
+          setOpen(false);
+        }}
+        className={`${baseBtn} ${idle}`}
+      >
         <Newspaper size={18} />
         News
       </button>
 
-      <button onClick={() => { account(); setOpen(false) }} className={`${baseBtn} ${idle}`}>
+      <button
+        onClick={() => {
+          account();
+          setOpen(false);
+        }}
+        className={`${baseBtn} ${idle}`}
+      >
         <User size={18} />
-       Account
+        Account
       </button>
     </>
-  )
+  );
 
   return (
     <>
@@ -86,12 +109,10 @@ const SideBar = ({ home, members, news, account }: PropsType) => {
         </div>
 
         {/* Bottom */}
-        <div className="text-xs text-gray-400 px-2">
-          © 2026 Your App
-        </div>
+        <div className="text-xs text-gray-400 px-2">© 2026 Your App</div>
       </aside>
     </>
-  )
-}
+  );
+};
 
-export default SideBar
+export default SideBar;
