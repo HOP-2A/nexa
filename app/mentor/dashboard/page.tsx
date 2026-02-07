@@ -1,63 +1,33 @@
 "use client"
 import MentorSideBar from "@/app/_component/mentorSideBar"
-import { useAuth } from "@/app/provider/authProvider"
-import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
 
 const Page = ()=>{
-    const [inputValue, setInputValue]= useState({
-        courseTitle:"",
-        courseInfo:"",
-        paymentValue:""
-    })
-    const { user: clerkUser } = useUser();
-  const { user } = useAuth(clerkUser?.id);
-    const {push} = useRouter()
-    const handleValue =(e: { target: { value: any; name: any } })=>{
-const {value, name} = e.target
-if(name==="courseTitle"){
-    setInputValue({...inputValue, courseTitle:value})
-}
-if(name==="courseInfo"){
-    setInputValue({...inputValue, courseInfo:value})
-}
+    const {push}= useRouter()
+    
+    return (<div className="min-h-screen flex bg-[radial-gradient(circle_at_20%_20%,#e0e7ff,transparent_40%),radial-gradient(circle_at_80%_0%,#d8b4fe,transparent_35%),#f8fafc]">
+          
+    <MentorSideBar
+      home={() => push("/mentor/dashboard")}
+      chat={() => push("/mentor/chat")}
+      account={() => push("/mentor/dashboard/account")}
+    />
 
-if(name==="paymentValue"){
-    setInputValue({...inputValue, paymentValue:value})
-}
-console.log(inputValue)
+    {/* RIGHT SIDE */}
+    <div className="flex-1 flex justify-center items-start px-8 md:px-16 py-14">
+      
+      <div className="w-full max-w-2xl relative rounded-[32px] p-[1px] bg-gradient-to-br from-indigo-500 via-violet-500 to-sky-400 shadow-2xl">
 
-    }  
-    const createCourse = async ()=>{
-      const res = await fetch("/api/mentor/createCourse",{
-            method:"POST",
-            body: JSON.stringify({
-                courseTitle:inputValue.courseTitle,
-                courseInfo:inputValue.courseInfo,
-                paymentValue:inputValue.paymentValue,
-                mentorId:user?.id
-              }),
-        })
-        if(res.ok){
-            console.log("created")
-        }
-    }
-
-      return <div>
-         <MentorSideBar
-        home={() => push("/mentor/dashboard")}
-        chat={() => push("/mentor/chat")}
-        account={() => push("/mentor/dashboard/account")}
-
-      />
-      <div>create my course<div>
+   hi
+   <button onClick={()=>{
+push("/mentor/dashboard/createCourse")
+   }}>go to create course</button>
       </div>
-      <input placeholder="courseTitle" name="courseTitle" onChange={handleValue}/>
-      <input placeholder="courseInfo"  name="courseInfo" onChange={handleValue}/>
-      <input placeholder="paymentValue"  name="paymentValue" onChange={handleValue}/>
-      <button onClick={createCourse}>create my Course</button>
-      </div>
+      <div onClick={()=>{
+        push("/mentor/dashboard/dates")
+      }}>available courses' dates</div>
     </div>
+  </div>
+)
 }
 export default Page
