@@ -105,17 +105,24 @@ const Page = () => {
       }
     };
     fetchStudentInfo();
+  }, [isLoaded, user]);
+
+  useEffect(() => {
+    if (!student?.id) return;
 
     const fetchInvites = async () => {
-      const res = await fetch(`/api/student/invites/${student?.id}`);
-
-      if (res.ok) {
+      try {
+        const res = await fetch(`/api/student/invites/${student.id}`);
+        if (!res.ok) throw new Error("Failed to fetch invites");
         const data = await res.json();
         setInvites(data);
+      } catch (err) {
+        console.error(err);
       }
     };
+
     fetchInvites();
-  }, [isLoaded, user]);
+  }, [student?.id]);
 
   useEffect(() => {
     if (!student) return;
@@ -151,7 +158,6 @@ const Page = () => {
       [name]: value,
     }));
   };
-
   return (
     <div className="bg-blue-50 min-h-screen px-4 sm:px-6 md:px-10 lg:px-20 py-8">
       <section className="flex flex-col space-y-6 max-w-6xl mx-auto">
@@ -306,6 +312,16 @@ const Page = () => {
                 </div>
               ))}
           </div>
+        </div>
+        <div className="py-3 px-6 pl-6 pr-7 bg-white rounded-lg shadow-sm w-fit">
+          <div>Invites overviev</div>
+          {invites?.map((invite) => (
+            <div key={invite?.id}>
+              <div> Code: {invite?.code}</div>
+              <div>Inviter: {invite?.inviterId}</div>
+              <div>Club name: Linda </div>
+            </div>
+          ))}
         </div>
       </section>
     </div>

@@ -6,7 +6,7 @@ export async function GET(
   {
     params,
   }: {
-    params: Promise<{ studentId: string }>;
+    params: { studentId: string };
   },
 ) {
   const { studentId } = await params;
@@ -15,6 +15,11 @@ export async function GET(
       id: studentId,
     },
   });
+
+  if (!student) {
+    return NextResponse.json({ error: "Student not found" }, { status: 404 });
+  }
+
   const invites = await prisma.invites.findMany({
     where: {
       studentEmail: student?.email,
