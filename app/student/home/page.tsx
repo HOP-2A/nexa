@@ -73,10 +73,20 @@ Club: {
     }
 }
 
+type AllClubs = {
+  code:number,
+  createdAt: string,
+  description: string,
+  id:string,
+  name:string,
+  presidentId:string
+}
+
 const Page = () => {
   const { isLoaded, isSignedIn, user } = useUser();
   const [student, setStudent] = useState<StudentType | null>(null);
   const [clubs, setClubs] = useState<ClubsType[] | null | undefined>(null);
+  const [allClubs, setAllClubs] = useState<AllClubs[] | null | undefined>(null);
   const [inputs, setInputs] = useState({
     name: "",
     description: ""  })
@@ -94,6 +104,18 @@ const Page = () => {
       }
     };
     fetchStudentInfo();
+
+    const fetchAllClubs = async () => {
+    try {
+      const res = await fetch(`/api/allClubs`);
+      const data = await res.json();
+      console.log(data)
+      setAllClubs(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  fetchAllClubs();
   }, [isLoaded, user]);
 
   useEffect(() => {
@@ -131,7 +153,19 @@ const Page = () => {
   }));
 };
 
-console.log(inputs)
+// useEffect(()=>{
+//   if (!isLoaded || !user) return;
+//   const fetchAllClubs = async () => {
+//     try {
+//       const res = await fetch(`/api/allClubs`);
+//       const data = await res.json();
+//       setAllClubs(data);
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   };
+//   fetchAllClubs();
+// }, [isLoaded, user, allClubs])
 
 return (
 <div className="bg-blue-50 min-h-screen px-4 sm:px-6 md:px-10 lg:px-20 py-8">
@@ -250,6 +284,25 @@ return (
       ))}
   </div>
 </div>
+
+<div className="mt-8">
+  <h3 className="font-semibold mb-3">Discover Clubs</h3>
+
+  <div className="flex gap-3 overflow-x-auto pb-2">
+    {allClubs?.map(club => (
+      <div
+        key={club.id}
+        className="min-w-[220px] bg-white rounded-lg p-4 shadow-sm"
+      >
+        <div className="font-medium">{club.name}</div>
+        <p className="text-xs text-gray-500 line-clamp-2 mt-1">
+          {club.description}
+        </p>
+      </div>
+    ))}
+  </div>
+</div>
+
   </section>
 </div>
 
