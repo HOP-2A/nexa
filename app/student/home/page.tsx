@@ -167,6 +167,10 @@ const Page = () => {
 //   fetchAllClubs();
 // }, [isLoaded, user, allClubs])
 
+const joinedClubIds = new Set(
+  student?.clubToStudents.map(c => c.Club.id)
+);
+
 return (
 <div className="bg-blue-50 min-h-screen px-4 sm:px-6 md:px-10 lg:px-20 py-8">
   <section className="flex flex-col space-y-6 max-w-6xl mx-auto">
@@ -289,7 +293,10 @@ return (
   <h3 className="font-semibold mb-3">Discover Clubs</h3>
 
   <div className="flex gap-3 overflow-x-auto pb-2">
-    {allClubs?.map(club => (
+    {allClubs
+      ?.filter(club => !joinedClubIds.has(club.id))
+      .map(club => (
+
       <div
         key={club.id}
         className="min-w-[220px] bg-white rounded-lg p-4 shadow-sm"
