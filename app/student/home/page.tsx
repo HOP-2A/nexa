@@ -79,10 +79,41 @@ type Invite = {
   studentEmail: string;
   inviterId: string;
   code: string;
+  Student: {
+    clerkId: string;
+    email: string;
+    firstname: string;
+    id: string;
+    lastname: string;
+    phone: string;
+    profilePic: string;
+    clubToStudents: {
+      id: string;
+      Club: {
+        code: string;
+        id: string;
+        name: string;
+        presidentId: string;
+      };
+    }[];
+  };
+};
+
+type NewClubType = {
+  id: string;
+  code: string;
+  description: string;
+  name: string;
+  presidentId: string;
+  clubToStudents: {
+    id: true;
+    studentId: true;
+  }[];
 };
 
 const Page = () => {
   const { isLoaded, isSignedIn, user } = useUser();
+  const [newClubs, setNewClubs] = useState<NewClubType[] | []>([]);
   const [student, setStudent] = useState<StudentType | null>(null);
   const [clubs, setClubs] = useState<ClubsType[] | null | undefined>(null);
   const [invites, setInvites] = useState<Invite[] | []>([]);
@@ -122,6 +153,23 @@ const Page = () => {
     };
 
     fetchInvites();
+  }, [student?.id]);
+
+  useEffect(() => {
+    if (!student?.id) return;
+
+    const fetchNewClubs = async () => {
+      try {
+        const res = await fetch(`/api/club-management/clubs/${student.id}`);
+        if (!res.ok) throw new Error("Failed to fetch invites");
+        const data = await res.json();
+        setNewClubs(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchNewClubs();
   }, [student?.id]);
 
   useEffect(() => {
@@ -284,44 +332,115 @@ const Page = () => {
           </div>
         </div>
 
-        <div className="py-3 px-6 pl-6 pr-7 bg-white rounded-lg shadow-sm w-fit">
-          <div className="text-gray-500 text-sm mb-2 font-semibold">
-            Events Overview
+        <div className="flex flex-col md:flex-row gap-6 items-start">
+          <div className="py-3 px-6 pl-6 pr-7 bg-white rounded-lg shadow-sm w-fit">
+            <div className="text-gray-500 text-sm mb-2 font-semibold">
+              Events Overview
+            </div>
+            <div className="flex space-x-4 mb-3 border-b border-gray-200">
+              <button className="pb-1 border-b-2 border-blue-600 text-blue-600 font-medium text-sm">
+                Upcoming
+              </button>
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {student?.clubToStudents
+                .flatMap((club) =>
+                  (club.Club?.events || []).map((event) => ({
+                    ...event,
+                    clubName: club?.Club.name,
+                  })),
+                )
+                .filter((event) => event.status === "NEW")
+                .map((event) => (
+                  <div key={event.eventId} className="text-sm text-gray-700">
+                    <div className="font-semibold">{event.title}</div>
+                    <div className="text-gray-500">
+                      {event.clubName} •{" "}
+                      {new Date(event.startingAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))}
+            </div>
           </div>
-          <div className="flex space-x-4 mb-3 border-b border-gray-200">
-            <button className="pb-1 border-b-2 border-blue-600 text-blue-600 font-medium text-sm">
-              Upcoming
-            </button>
-          </div>
-          <div className="space-y-2 max-h-64 overflow-y-auto">
-            {student?.clubToStudents
-              .flatMap((club) =>
-                (club.Club?.events || []).map((event) => ({
-                  ...event,
-                  clubName: club?.Club.name,
-                })),
-              )
-              .filter((event) => event.status === "NEW")
-              .map((event) => (
-                <div key={event.eventId} className="text-sm text-gray-700">
-                  <div className="font-semibold">{event.title}</div>
-                  <div className="text-gray-500">
-                    {event.clubName} •{" "}
-                    {new Date(event.startingAt).toLocaleDateString()}
+          <div className="rounded-lg bg-white shadow-sm w-full md:w-1/3 max-h-[200px] overflow-y-auto p-6 space-y-4">
+            <h2 className="text-lg font-semibold">Invites overview</h2>
+
+            {invites?.map((invite) => {
+              const student = invite?.Student;
+
+              const matchingClub = student?.clubToStudents?.find(
+                (club) =>
+                  club?.Club?.presidentId === student?.id &&
+                  club?.Club?.code === invite?.code,
+              );
+
+              return (
+                <div
+                  key={invite.id}
+                  className="border rounded-md p-4 space-y-1 text-sm"
+                >
+                  <div>
+                    <span className="font-medium">Code:</span> {invite.code}
+                  </div>
+
+                  <div>
+                    <span className="font-medium">Inviter:</span>{" "}
+                    {student?.firstname} {student?.lastname}
+                  </div>
+
+                  <div>
+                    <span className="font-medium">Inviter email:</span>{" "}
+                    {student?.email}
+                  </div>
+
+                  <div>
+                    <span className="font-medium">Club name:</span>{" "}
+                    {matchingClub ? (
+                      <span>{matchingClub.Club?.name}</span>
+                    ) : (
+                      <span className="text-red-500">
+                        Unknown club, please contact the inviter
+                      </span>
+                    )}
                   </div>
                 </div>
-              ))}
+              );
+            })}
           </div>
         </div>
-        <div className="py-3 px-6 pl-6 pr-7 bg-white rounded-lg shadow-sm w-fit">
-          <div>Invites overviev</div>
-          {invites?.map((invite) => (
-            <div key={invite?.id}>
-              <div> Code: {invite?.code}</div>
-              <div>Inviter: {invite?.inviterId}</div>
-              <div>Club name: Linda </div>
-            </div>
-          ))}
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900">Join New Clubs</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            {newClubs?.map((club) => (
+              <div
+                key={club?.id}
+                onClick={() => push(`/student/clubForm/${club?.id}`)}
+                className="group cursor-pointer bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+              >
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
+                    {club?.name}
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-2 line-clamp-2">
+                    {club?.description}
+                  </p>
+
+                  <div className="flex items-center justify-between mt-5">
+                    <div
+                      className="px-3 py-1 text-sm font-medium 
+                          bg-blue-50 text-blue-600 
+                          rounded-full"
+                    >
+                      👥 {club?.clubToStudents?.length} Members
+                    </div>
+                    <span className="text-gray-400 group-hover:text-blue-500 transition-colors">
+                      →
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>

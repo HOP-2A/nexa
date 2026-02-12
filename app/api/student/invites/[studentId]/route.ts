@@ -24,6 +24,17 @@ export async function GET(
     where: {
       studentEmail: student?.email,
     },
+    include: {
+      Student: {
+        include: {
+          clubToStudents: {
+            include: {
+              Club: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   return NextResponse.json(invites);
