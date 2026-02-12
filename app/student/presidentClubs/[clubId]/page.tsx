@@ -50,11 +50,37 @@ type ClubType = {
   }[];
 };
 
+type FormsType = {
+  id: string;
+  age: number;
+  class: string;
+  clubId: string;
+  experience: string | null;
+  message: string | null;
+  personalStatement: string | null;
+  skills: string | null;
+  status: "PENDING" | "APPROVED" | "REJECTED" | "NULL";
+  submittedAt: string;
+  studentId: string;
+  whyThisClub: string | null;
+  student: {
+    clerkId: string;
+    email: string;
+    firstname: string;
+    lastname: string;
+    id: string;
+    phone: string | null;
+    progilePic: string | null;
+  };
+};
+
 const Page = () => {
   const params = useParams();
   const clubId = params.clubId as string;
   const [club, setClub] = useState<ClubType | null>(null);
+  const [forms, setForms] = useState<FormsType[] | []>([]);
   const { isLoaded, isSignedIn, user } = useUser();
+  const [selectedForm, setSelected] = useState<FormsType | null>(null);
   const [reason, setReason] = useState("");
   const [inviteInput, setInvite] = useState({
     email: "",
@@ -166,6 +192,20 @@ const Page = () => {
       toast.error("Something went wrong, please proof read");
     }
   };
+
+  useEffect(() => {
+    if (!clubId || !user) return;
+    const Forms = async () => {
+      const res = await fetch(`/api/club-management/bring-forms/${clubId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setForms(data);
+      } else {
+        console.log("error");
+      }
+    };
+    Forms();
+  }, [isLoaded, user, clubId]);
 
   return (
     <div className="min-h-screen bg-blue-50 px-6 py-8">
@@ -354,223 +394,381 @@ const Page = () => {
             </div>
           </div>
         </section>
-        <section className="mt-6">
-          <div className="py-3 px-6 bg-white rounded-lg shadow-sm w-full sm:w-fit">
-            <div className="flex justify-between items-center mb-3">
-              <div className="text-gray-500 text-sm font-semibold">
-                Events Overview
-              </div>
+        <div className="flex flex-col lg:flex-row lg:space-x-6">
+          <section className="mt-6">
+            <div className="py-3 px-6 bg-white rounded-lg shadow-sm w-full sm:w-fit">
+              <div className="flex justify-between items-center mb-3">
+                <div className="text-gray-500 text-sm font-semibold">
+                  Events Overview
+                </div>
 
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 font-semibold text-sm rounded hover:bg-blue-200 transition">
-                    ➕ Create Event
-                  </button>
-                </DialogTrigger>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 font-semibold text-sm rounded hover:bg-blue-200 transition">
+                      ➕ Create Event
+                    </button>
+                  </DialogTrigger>
 
-                <DialogContent className="w-full">
-                  <DialogHeader>
-                    <DialogTitle>Create New Event</DialogTitle>
-                    <DialogDescription>
-                      Fill in the details below to create your new event.
-                    </DialogDescription>
-                  </DialogHeader>
+                  <DialogContent className="w-full">
+                    <DialogHeader>
+                      <DialogTitle>Create New Event</DialogTitle>
+                      <DialogDescription>
+                        Fill in the details below to create your new event.
+                      </DialogDescription>
+                    </DialogHeader>
 
-                  <form className="mt-4 space-y-4">
-                    <div>
-                      <label className="block text-gray-700 text-sm mb-1">
-                        Event Title
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Enter event title"
-                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        value={inputs.title}
-                        name="title"
-                        onChange={handleInput}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-700 text-sm mb-1">
-                        Location
-                      </label>
-                      <input
-                        placeholder="Enter location"
-                        className="w-full  border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        value={inputs.location}
-                        name="location"
-                        onChange={handleInput}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-700 text-sm mb-1">
-                        Description
-                      </label>
-                      <input
-                        placeholder="Enter description"
-                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        value={inputs.description}
-                        name="description"
-                        onChange={handleInput}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-700 text-sm mb-1">
-                        Capacity
-                      </label>
-                      <input
-                        placeholder="Enter capacity"
-                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        value={inputs.capacity}
-                        name="capacity"
-                        onChange={handleInput}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <div className="flex-1">
+                    <form className="mt-4 space-y-4">
+                      <div>
                         <label className="block text-gray-700 text-sm mb-1">
-                          Start Time
+                          Event Title
                         </label>
                         <input
-                          type="datetime-local"
-                          className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                          value={inputs.startingAt}
-                          name="startingAt"
+                          type="text"
+                          placeholder="Enter event title"
+                          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                          value={inputs.title}
+                          name="title"
                           onChange={handleInput}
                         />
                       </div>
-
-                      <div className="flex-1">
+                      <div>
                         <label className="block text-gray-700 text-sm mb-1">
-                          End Time
+                          Location
                         </label>
                         <input
-                          type="datetime-local"
-                          className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                          value={inputs.endingAt}
-                          name="endingAt"
+                          placeholder="Enter location"
+                          className="w-full  border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                          value={inputs.location}
+                          name="location"
                           onChange={handleInput}
                         />
                       </div>
-                    </div>
-                    <div className="flex justify-end space-x-2 mt-2">
-                      <DialogClose asChild>
-                        <button className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">
-                          Cancel
+                      <div>
+                        <label className="block text-gray-700 text-sm mb-1">
+                          Description
+                        </label>
+                        <input
+                          placeholder="Enter description"
+                          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                          value={inputs.description}
+                          name="description"
+                          onChange={handleInput}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 text-sm mb-1">
+                          Capacity
+                        </label>
+                        <input
+                          placeholder="Enter capacity"
+                          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                          value={inputs.capacity}
+                          name="capacity"
+                          onChange={handleInput}
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex-1">
+                          <label className="block text-gray-700 text-sm mb-1">
+                            Start Time
+                          </label>
+                          <input
+                            type="datetime-local"
+                            className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            value={inputs.startingAt}
+                            name="startingAt"
+                            onChange={handleInput}
+                          />
+                        </div>
+
+                        <div className="flex-1">
+                          <label className="block text-gray-700 text-sm mb-1">
+                            End Time
+                          </label>
+                          <input
+                            type="datetime-local"
+                            className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            value={inputs.endingAt}
+                            name="endingAt"
+                            onChange={handleInput}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-2 mt-2">
+                        <DialogClose asChild>
+                          <button className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">
+                            Cancel
+                          </button>
+                        </DialogClose>
+                        <button
+                          type="submit"
+                          className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                          onClick={() => {
+                            CreateEvent();
+                          }}
+                        >
+                          Create
                         </button>
-                      </DialogClose>
-                      <button
-                        type="submit"
-                        className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-                        onClick={() => {
-                          CreateEvent();
-                        }}
-                      >
-                        Create
-                      </button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              <div className="flex space-x-4 mb-3 border-b border-gray-200">
+                <button className="pb-1 border-b-2 border-blue-600 text-blue-600 font-medium text-sm">
+                  Upcoming
+                </button>
+              </div>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {club?.events
+                  ?.filter((event) => event.status === "NEW")
+                  .map((event) => (
+                    <div
+                      key={event.eventId}
+                      className="p-2 rounded-md hover:bg-blue-50 transition-colors cursor-pointer"
+                    >
+                      <div className="font-semibold text-gray-900 text-sm">
+                        {event.title}
+                      </div>
+
+                      <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500 mt-1">
+                        {" "}
+                        {event.location && (
+                          <span className="flex items-center gap-1">
+                            {" "}
+                            📍 <span>{event.location}</span>{" "}
+                          </span>
+                        )}{" "}
+                        {event.startingAt && (
+                          <span className="flex items-center gap-1">
+                            {" "}
+                            📅{" "}
+                            <span>
+                              {" "}
+                              {formatEventDate(
+                                (event?.startingAt).toString(),
+                              )}{" "}
+                            </span>{" "}
+                          </span>
+                        )}{" "}
+                      </div>
+
+                      {event.description && (
+                        <div className="text-gray-600 text-xs mt-1 line-clamp-2">
+                          {event.description}
+                        </div>
+                      )}
                     </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
+                  ))}
+                {!club?.events?.some((event) => event.status === "NEW") && (
+                  <div className="text-gray-400 text-sm">
+                    No upcoming events
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="flex space-x-4 mb-3 border-b border-gray-200">
-              <button className="pb-1 border-b-2 border-blue-600 text-blue-600 font-medium text-sm">
-                Upcoming
+          </section>
+          <section className="mt-6 bg-white p-4 rounded-lg shadow-sm max-w-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-900 mr-1">
+                Invite Student
+              </h3>
+              <p className="text-xs text-gray-500">Quick invite via email</p>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-gray-700 text-xs font-medium mb-1">
+                  Club Code
+                </label>
+                <input
+                  type="text"
+                  placeholder="****"
+                  name="code"
+                  value={inviteInput.code}
+                  onChange={(e) => {
+                    HandleInvites(e);
+                  }}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 text-xs font-medium mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={inviteInput.email}
+                  onChange={(e) => {
+                    HandleInvites(e);
+                  }}
+                  placeholder="john@example.com"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+              <button
+                onClick={() => {
+                  Invite();
+                }}
+                className="w-full px-3 py-1.5 bg-blue-500 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-blue-700 transition"
+              >
+                Send Invite
               </button>
             </div>
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {club?.events
-                ?.filter((event) => event.status === "NEW")
-                .map((event) => (
-                  <div
-                    key={event.eventId}
-                    className="p-2 rounded-md hover:bg-blue-50 transition-colors cursor-pointer"
-                  >
-                    <div className="font-semibold text-gray-900 text-sm">
-                      {event.title}
-                    </div>
-
-                    <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500 mt-1">
-                      {" "}
-                      {event.location && (
-                        <span className="flex items-center gap-1">
-                          {" "}
-                          📍 <span>{event.location}</span>{" "}
-                        </span>
-                      )}{" "}
-                      {event.startingAt && (
-                        <span className="flex items-center gap-1">
-                          {" "}
-                          📅{" "}
-                          <span>
-                            {" "}
-                            {formatEventDate(
-                              (event?.startingAt).toString(),
-                            )}{" "}
-                          </span>{" "}
-                        </span>
-                      )}{" "}
-                    </div>
-
-                    {event.description && (
-                      <div className="text-gray-600 text-xs mt-1 line-clamp-2">
-                        {event.description}
-                      </div>
-                    )}
+          </section>
+        </div>
+        <section className="flex flex-col lg:flex-row gap-6 mt-6">
+          {/* LEFT COLUMN — Student Selection */}
+          <div className="w-full lg:w-1/3 bg-white p-5 rounded-xl shadow-sm">
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">
+              Submitted Forms
+            </h4>
+            <div className="space-y-2 max-h-[500px] overflow-y-auto">
+              {forms?.map((form) => (
+                <div
+                  key={form.id}
+                  onClick={() => setSelected(form)}
+                  className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition 
+            ${
+              selectedForm?.id === form.id
+                ? "bg-blue-50 border-blue-300"
+                : "hover:bg-gray-50 border-gray-200"
+            }`}
+                >
+                  <div className="font-medium text-gray-900">
+                    {form.student.firstname} {form.student.lastname}
                   </div>
-                ))}
-              {!club?.events?.some((event) => event.status === "NEW") && (
-                <div className="text-gray-400 text-sm">No upcoming events</div>
+                  <div className="text-xs text-gray-500">
+                    {new Date(form.submittedAt).toLocaleDateString()}
+                  </div>
+                </div>
+              ))}
+              {!forms?.length && (
+                <div className="text-gray-400 text-sm p-3 bg-gray-50 rounded-xl border border-gray-200">
+                  No forms submitted yet
+                </div>
               )}
             </div>
           </div>
-        </section>
-        <section className="mt-6 bg-white p-4 rounded-lg shadow-sm max-w-sm">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-900 mr-1">
-              Invite Student
-            </h3>
-            <p className="text-xs text-gray-500">Quick invite via email</p>
-          </div>
-          <div className="space-y-3">
-            <div>
-              <label className="block text-gray-700 text-xs font-medium mb-1">
-                Club Code
-              </label>
-              <input
-                type="text"
-                placeholder="****"
-                name="code"
-                value={inviteInput.code}
-                onChange={(e) => {
-                  HandleInvites(e);
-                }}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 text-xs font-medium mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={inviteInput.email}
-                onChange={(e) => {
-                  HandleInvites(e);
-                }}
-                placeholder="john@example.com"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
-            <button
-              onClick={() => {
-                Invite();
-              }}
-              className="w-full px-3 py-1.5 bg-blue-500 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-blue-700 transition"
-            >
-              Send Invite
-            </button>
+
+          {/* RIGHT COLUMN — Selected Form */}
+          <div className="w-full lg:w-2/3 bg-white p-6 rounded-xl shadow-sm">
+            {selectedForm ? (
+              <>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                  <h4 className="text-2xl font-semibold text-gray-900">
+                    {selectedForm.student.firstname}{" "}
+                    {selectedForm.student.lastname}
+                  </h4>
+                  <span
+                    className={`px-3 py-1 text-sm font-semibold rounded-full ${
+                      selectedForm.status === "APPROVED"
+                        ? "bg-green-100 text-green-800"
+                        : selectedForm.status === "REJECTED"
+                          ? "bg-red-100 text-red-800"
+                          : selectedForm.status === "PENDING"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {selectedForm.status}
+                  </span>
+                </div>
+
+                {/* Form Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                  <div className="flex">
+                    <p className="w-32 font-medium text-gray-500">
+                      First Name:
+                    </p>
+                    <p className="text-gray-900">
+                      {selectedForm.student.firstname}
+                    </p>
+                  </div>
+                  <div className="flex">
+                    <p className="w-32 font-medium text-gray-500">Last Name:</p>
+                    <p className="text-gray-900">
+                      {selectedForm.student.lastname}
+                    </p>
+                  </div>
+                  <div className="flex">
+                    <p className="w-32 font-medium text-gray-500">Age:</p>
+                    <p className="text-gray-900">{selectedForm.age}</p>
+                  </div>
+                  <div className="flex">
+                    <p className="w-32 font-medium text-gray-500">Class:</p>
+                    <p className="text-gray-900">{selectedForm.class}</p>
+                  </div>
+                  <div className="flex">
+                    <p className="w-32 font-medium text-gray-500">Email:</p>
+                    <p className="text-gray-900">
+                      {selectedForm.student.email}
+                    </p>
+                  </div>
+                  <div className="flex">
+                    <p className="w-32 font-medium text-gray-500">Phone:</p>
+                    <p className="text-gray-900">
+                      {selectedForm.student.phone || "N/A"}
+                    </p>
+                  </div>
+                  <div className="flex md:col-span-2">
+                    <p className="w-32 font-medium text-gray-500">
+                      Experience:
+                    </p>
+                    <p className="text-gray-900">
+                      {selectedForm.experience || "N/A"}
+                    </p>
+                  </div>
+                  <div className="flex md:col-span-2">
+                    <p className="w-32 font-medium text-gray-500">Skills:</p>
+                    <p className="text-gray-900">
+                      {selectedForm.skills || "N/A"}
+                    </p>
+                  </div>
+                  <div className="flex md:col-span-2">
+                    <p className="w-32 font-medium text-gray-500">
+                      Personal Statement:
+                    </p>
+                    <p className="text-gray-900">
+                      {selectedForm.personalStatement || "N/A"}
+                    </p>
+                  </div>
+                  <div className="flex md:col-span-2">
+                    <p className="w-32 font-medium text-gray-500">Message:</p>
+                    <p className="text-gray-900">
+                      {selectedForm.message || "N/A"}
+                    </p>
+                  </div>
+                  <div className="flex md:col-span-2">
+                    <p className="w-32 font-medium text-gray-500">
+                      Why this Club?
+                    </p>
+                    <p className="text-gray-900">
+                      {selectedForm.whyThisClub || "N/A"}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      className="px-4 text-sm py-2 bg-gray-200 text-gray-800 font-medium rounded-md border border-gray-300 hover:bg-gray-300 transition"
+                      // onClick={() => handleReject(selectedForm?.id)}
+                    >
+                      Reject
+                    </button>
+                    <button
+                      className="px-4 text-sm py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition"
+                      // onClick={() => handleAccept(selectedForm?.id)}
+                    >
+                      Accept
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="text-gray-400 text-center py-20 text-sm">
+                Select a student to view the form
+              </div>
+            )}
           </div>
         </section>
       </div>
