@@ -52,10 +52,26 @@ type ClubType = {
   }[];
 };
 
+type FormType = {
+  age: number;
+  class: string;
+  clubId: string;
+  experience: string;
+  id: string;
+  message: string;
+  personalStatement: string;
+  skills: string;
+  status: string;
+  studentId: string;
+  submittedAt: string;
+  whyThisClub: string;
+};
+
 const Page = () => {
   const params = useParams();
   const clubId = params.clubId as string;
   const [club, setClub] = useState<ClubType | null>(null);
+  const [form, setForm] = useState<FormType | null>(null);
   const [inputs, setInputs] = useState({
     age: "",
     class: "",
@@ -119,6 +135,28 @@ const Page = () => {
       toast.error("Something went wrong, please resend");
     }
   };
+
+  useEffect(() => {
+    if (!clubId || !user) return;
+
+    const FindInfo = async () => {
+      const res = await fetch("/api/student/FindInfo", {
+        method: "POST",
+        body: JSON.stringify({
+          studentClerk: user?.id,
+          clubId: club?.id,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setForm(data);
+      } else {
+        toast.error("Something went wrong");
+      }
+    };
+    FindInfo();
+  }, [isLoaded, user, clubId]);
 
   const JoinByCode = async (clubCode: string, cludId: string) => {
     if (code === clubCode) {
@@ -220,158 +258,243 @@ const Page = () => {
             </div>
           </div>
         </section>
-        <section className="mt-8 bg-gray-100 border border-gray-200 rounded-xl shadow-sm p-6">
-          <h4 className="text-xl font-semibold text-gray-800">
-            Apply to Enroll
-          </h4>
-          <div className="mt-6">
-            <p className="text-sm font-medium text-gray-700 mb-2">
-              Join using club code
-            </p>
+        {!form ? (
+          <section className="mt-8 bg-gray-100 border border-gray-200 rounded-xl shadow-sm p-6">
+            <h4 className="text-xl font-semibold text-gray-800">
+              Apply to Enroll
+            </h4>
+            <div className="mt-6">
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Join using club code
+              </p>
 
-            <div className="flex gap-3">
-              <Input
-                placeholder="Enter club code..."
-                className="flex-1 bg-white border-gray-300 focus:ring-blue-400"
-                value={code}
-                onChange={(e) => {
-                  handleCode(e);
-                }}
-              />
-              <Button
-                onClick={() => {
-                  JoinByCode(club?.code!, club?.id!);
-                }}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-5"
-              >
-                Join
-              </Button>
+              <div className="flex gap-3">
+                <Input
+                  placeholder="Enter club code..."
+                  className="flex-1 bg-white border-gray-300 focus:ring-blue-400"
+                  value={code}
+                  onChange={(e) => {
+                    handleCode(e);
+                  }}
+                />
+                <Button
+                  onClick={() => {
+                    JoinByCode(club?.code!, club?.id!);
+                  }}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-5"
+                >
+                  Join
+                </Button>
+              </div>
             </div>
-          </div>
-          <div className="border-t border-gray-200 my-6"></div>
-          <div>
-            <p className="text-sm font-medium text-gray-700 mb-3">
-              Or submit an application form
-            </p>
+            <div className="border-t border-gray-200 my-6"></div>
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-3">
+                Or submit an application form
+              </p>
 
-            <Dialog>
-              <DialogTrigger asChild>
-                <button className="w-full bg-white border border-gray-200 rounded-lg p-4 text-left hover:bg-gray-50 transition">
-                  <div className="text-sm text-gray-500">
-                    Application Required
-                  </div>
-                  <div className="text-base font-semibold text-gray-800 mt-1">
-                    Open Application Form
-                  </div>
-                </button>
-              </DialogTrigger>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="w-full bg-white border border-gray-200 rounded-lg p-4 text-left hover:bg-gray-50 transition">
+                    <div className="text-sm text-gray-500">
+                      Application Required
+                    </div>
+                    <div className="text-base font-semibold text-gray-800 mt-1">
+                      Open Application Form
+                    </div>
+                  </button>
+                </DialogTrigger>
 
-              <DialogContent className="sm:max-w-md w-full bg-gray-100 border border-gray-200 rounded-xl">
-                <DialogHeader>
-                  <DialogTitle className="text-lg font-semibold text-gray-800">
-                    Application Form
-                  </DialogTitle>
-                  <DialogDescription className="text-sm text-gray-500">
-                    Fill in the details below to apply for this club.
-                  </DialogDescription>
-                </DialogHeader>
+                <DialogContent className="sm:max-w-md w-full bg-gray-100 border border-gray-200 rounded-xl">
+                  <DialogHeader>
+                    <DialogTitle className="text-lg font-semibold text-gray-800">
+                      Application Form
+                    </DialogTitle>
+                    <DialogDescription className="text-sm text-gray-500">
+                      Fill in the details below to apply for this club.
+                    </DialogDescription>
+                  </DialogHeader>
 
-                <form className="mt-5 space-y-4">
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-1">
-                      Your Class
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter class name..."
-                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      value={inputs.class}
-                      name="class"
-                      onChange={handleInput}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-1">
-                      Your age
-                    </label>
-                    <input
-                      placeholder="Enter age..."
-                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      value={inputs.age}
-                      name="age"
-                      onChange={handleInput}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-1">
-                      Personal statement /150 words maximum/
-                    </label>
-                    <input
-                      placeholder="Enter text..."
-                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      value={inputs.personalStatement}
-                      name="personalStatement"
-                      onChange={handleInput}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-1">
-                      Your experience /100 words maximum/
-                    </label>
-                    <input
-                      placeholder="Enter text..."
-                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      value={inputs.experience}
-                      name="experience"
-                      onChange={handleInput}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-1">
-                      Your Skills /100 words maximum/
-                    </label>
-                    <input
-                      placeholder="Enter text..."
-                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      value={inputs.skills}
-                      name="skills"
-                      onChange={handleInput}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-1">
-                      Explain why you want this club /150 words maximum/
-                    </label>
-                    <input
-                      placeholder="Enter text..."
-                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      value={inputs.why}
-                      name="why"
-                      onChange={handleInput}
-                    />
-                  </div>
-                  <div className="flex justify-end gap-3 pt-2">
-                    <DialogClose asChild>
-                      <button className="px-4 py-2 text-sm rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700">
-                        Cancel
+                  <form className="mt-5 space-y-4">
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">
+                        Your Class
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Enter class name..."
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        value={inputs.class}
+                        name="class"
+                        onChange={handleInput}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">
+                        Your age
+                      </label>
+                      <input
+                        placeholder="Enter age..."
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        value={inputs.age}
+                        name="age"
+                        onChange={handleInput}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">
+                        Personal statement /150 words maximum/
+                      </label>
+                      <input
+                        placeholder="Enter text..."
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        value={inputs.personalStatement}
+                        name="personalStatement"
+                        onChange={handleInput}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">
+                        Your experience /100 words maximum/
+                      </label>
+                      <input
+                        placeholder="Enter text..."
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        value={inputs.experience}
+                        name="experience"
+                        onChange={handleInput}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">
+                        Your Skills /100 words maximum/
+                      </label>
+                      <input
+                        placeholder="Enter text..."
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        value={inputs.skills}
+                        name="skills"
+                        onChange={handleInput}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">
+                        Explain why you want this club /150 words maximum/
+                      </label>
+                      <input
+                        placeholder="Enter text..."
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        value={inputs.why}
+                        name="why"
+                        onChange={handleInput}
+                      />
+                    </div>
+                    <div className="flex justify-end gap-3 pt-2">
+                      <DialogClose asChild>
+                        <button className="px-4 py-2 text-sm rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700">
+                          Cancel
+                        </button>
+                      </DialogClose>
+
+                      <button
+                        type="submit"
+                        onClick={() => {
+                          JoinByForm(club?.id!);
+                        }}
+                        className="px-4 py-2 text-sm rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+                      >
+                        Submit
                       </button>
-                    </DialogClose>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </section>
+        ) : (
+          <section className="w-full max-w-4xl mx-auto bg-white border border-gray-200 rounded-lg p-6 text-sm mt-6">
+            <div className="flex flex-col gap-6">
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-200 pb-4">
+                <div>
+                  <h2 className="text-base font-medium text-gray-900">
+                    Student Application
+                  </h2>
+                  <p className="text-gray-500">
+                    Submitted on {form?.submittedAt}
+                  </p>
+                </div>
+                <span className="px-3 py-1 text-xs border border-gray-300 rounded-md text-gray-600 w-fit">
+                  {form.status}
+                </span>
+              </div>
 
-                    <button
-                      type="submit"
-                      onClick={() => {
-                        JoinByForm(club?.id!);
-                      }}
-                      className="px-4 py-2 text-sm rounded-lg bg-blue-500 text-white hover:bg-blue-600"
-                    >
-                      Submit
-                    </button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </section>
+              {/* Basic Info */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-gray-500">Student ID</p>
+                  <p className="text-gray-900">{form.studentId}</p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500">Age</p>
+                  <p className="text-gray-900">{form.age}</p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500">Class</p>
+                  <p className="text-gray-900">{form.class}</p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500">Club ID</p>
+                  <p className="text-gray-900">{form.clubId}</p>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-200" />
+
+              {/* Long Text Sections */}
+              <div className="flex flex-col gap-5">
+                <div>
+                  <p className="text-gray-500 mb-1">Skills</p>
+                  <p className="text-gray-900 whitespace-pre-line">
+                    {form.skills}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500 mb-1">Experience</p>
+                  <p className="text-gray-900 whitespace-pre-line">
+                    {form.experience}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500 mb-1">Why This Club</p>
+                  <p className="text-gray-900 whitespace-pre-line">
+                    {form.whyThisClub}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500 mb-1">Personal Statement</p>
+                  <p className="text-gray-900 whitespace-pre-line">
+                    {form?.personalStatement}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500 mb-1">Additional Message</p>
+                  <p className="text-gray-900 whitespace-pre-line">
+                    {form.message}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

@@ -206,6 +206,34 @@ const Page = () => {
       [name]: value,
     }));
   };
+
+  const Reject = async (inviteId: string) => {
+    const res = await fetch(`/api/club-management/invite-reject/${inviteId}`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
+      toast.success("Successfully Rejected the invite");
+    } else {
+      toast.error("Somethibg went wrong, reject again hha");
+    }
+  };
+
+  const Accept = async (clubId: string, inviteId: string) => {
+    const res = await fetch("/api/club-management/invite-accept", {
+      method: "POST",
+      body: JSON.stringify({
+        studentId: student?.id,
+        clubId: clubId,
+        inviteId: inviteId,
+      }),
+    });
+
+    if (res.ok) {
+      toast.success("Successfully entered the club");
+    } else {
+      toast.error("Something went wrong");
+    }
+  };
   return (
     <div className="bg-blue-50 min-h-screen px-4 sm:px-6 md:px-10 lg:px-20 py-8">
       <section className="flex flex-col space-y-6 max-w-6xl mx-auto">
@@ -402,6 +430,26 @@ const Page = () => {
                         Unknown club, please contact the inviter
                       </span>
                     )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        Reject(invite.id);
+                      }}
+                      className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-md hover:bg-gray-100 transition"
+                    >
+                      Reject
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        Accept(matchingClub?.Club?.id!, invite?.id);
+                      }}
+                      className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-md hover:bg-gray-900 hover:text-white transition"
+                    >
+                      Accept
+                    </button>
                   </div>
                 </div>
               );
