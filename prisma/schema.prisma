@@ -7,23 +7,20 @@ datasource db {
 }
 
 model Student {
-  id                   String               @id @default(nanoid())
-  firstname            String
-  lastname             String
-  clerkId              String               @unique
-  email                String               @unique
-  createdAt            DateTime             @default(now())
-  profilePic           String?
-  phone                String?
-  presiding            Club[]               @relation("ClubPresident")
-  applications         ClubForm[]
-  clubToStudents       ClubToStudents[]
-  mentorStudent        MentorStudent[]
-  clubs                Club[]               @relation("ClubToStudent")
-  invites              Invites[]
-  posts                Post[]
-  comments             Comment[]
-  mentorAvailabilities MentorAvailability[]
+  id             String           @id @default(nanoid())
+  firstname      String
+  lastname       String
+  clerkId        String           @unique
+  email          String           @unique
+  createdAt      DateTime         @default(now())
+  profilePic     String?
+  phone          String?
+  presiding      Club[]           @relation("ClubPresident")
+  applications   ClubForm[]
+  clubToStudents ClubToStudents[]
+  mentorStudent  MentorStudent[]
+  clubs          Club[]           @relation("ClubToStudent")
+  MentorAvailability  MentorAvailability[]
 }
 
 model Club {
@@ -41,19 +38,20 @@ model Club {
 }
 
 model Mentor {
-  id                   String               @id @default(nanoid())
-  firstname            String
-  lastname             String
-  email                String               @unique
-  clerkId              String               @unique
-  rating               Ratings              @default(NONE)
-  bio                  String?
-  description          String?
-  profilePic           String?
-  experienceYears      String?
-  courses              Course[]
-  mentorStudent        MentorStudent[]
-  mentorAvailabilities MentorAvailability[]
+  id              String          @id @default(nanoid())
+  firstname       String
+  lastname        String
+  email           String          @unique
+  clerkId         String          @unique
+  rating          Ratings         @default(NONE)
+  bio             String?
+  description     String?
+  profilePic      String?
+  experienceYears String?
+  courses         Course[]
+  mentorStudent   MentorStudent[]
+  MentorAvailability  MentorAvailability[]
+
 }
 
 model ClubEvent {
@@ -110,14 +108,32 @@ model ClubToStudents {
 }
 
 model Course {
-  id                   String               @id @default(nanoid())
-  mentorId             String
-  createdAt            DateTime             @default(now())
-  paymentValue         String
-  courseTitle          String
-  courseInfo           String
-  mentor               Mentor               @relation(fields: [mentorId], references: [id])
-  mentorAvailabilities MentorAvailability[]
+  id           String   @id @default(nanoid())
+  mentorId     String
+  createdAt    DateTime @default(now())
+  paymentValue String
+  courseTitle  String
+  courseInfo   String
+  mentor       Mentor   @relation(fields: [mentorId], references: [id])
+   MentorAvailability  MentorAvailability[]
+
+}
+model MentorAvailability {
+  id          String      @id @default(cuid())
+  startTime   String
+  endTime     String
+  status      SlotStatus  @default(AVAILABLE)
+  availableDate      DateTime
+  mentorId    String
+  mentor      Mentor      @relation(fields: [mentorId], references: [id])
+courseId    String
+  course      Course      @relation(fields: [courseId], references: [id])
+
+  studentId   String?
+  student     Student?    @relation(fields: [studentId], references: [id])
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model Invites {
@@ -195,14 +211,9 @@ enum ApplicationStatus {
   REJECTED
 }
 
-enum PostStatus {
-  PRESIDENT
-  MEMBER
-}
-
 enum SlotStatus {
-  AVAILABLE
-  BOOKED
-  PENDING
-  CANCELED
+  AVAILABLE 
+  BOOKED  
+  PENDING   
+  CANCELED   
 }
