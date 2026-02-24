@@ -150,10 +150,9 @@ const Page = () => {
 
       if (res.ok) {
         const data = await res.json();
-        console.log(data);
         setForm(data);
       } else {
-        console.log("error");
+        toast.error("Something went wrong");
       }
     };
     FindInfo();

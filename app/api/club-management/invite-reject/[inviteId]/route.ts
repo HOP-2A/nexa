@@ -11,7 +11,6 @@ export async function DELETE(
 ) {
   const { inviteId } = await params;
 
-  console.log("hahahaha");
   await prisma.invites.delete({
     where: {
       id: inviteId,
