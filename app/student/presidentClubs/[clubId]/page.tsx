@@ -207,6 +207,32 @@ const Page = () => {
     Forms();
   }, [isLoaded, user, clubId]);
 
+  const Reject = async (formId: string) => {
+    const res = await fetch(`/api/club-management/reject-form/${formId}`, {
+      method: "POST",
+    });
+    if (res.ok) {
+      toast.success("Successfully rejected student");
+    } else {
+      toast.error("Something went wrong");
+    }
+  };
+
+  const Accept = async (formId: string) => {
+    const res = await fetch("/api/club-management/accept-form", {
+      method: "POST",
+      body: JSON.stringify({
+        formId: formId,
+      }),
+    });
+
+    if (res.ok) {
+      toast.success("Successfully accepted student");
+    } else {
+      toast.error("Something went wrong");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-blue-50 px-6 py-8">
       <div className="max-w-4xl mx-auto">
@@ -624,38 +650,37 @@ const Page = () => {
               Submitted Forms
             </h4>
             <div className="space-y-2 max-h-[500px] overflow-y-auto">
-              {forms?.map((form) => (
-                <div
-                  key={form.id}
-                  onClick={() => setSelected(form)}
-                  className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition 
-            ${
-              selectedForm?.id === form.id
-                ? "bg-blue-50 border-blue-300"
-                : "hover:bg-gray-50 border-gray-200"
-            }`}
-                >
-                  <div className="font-medium text-gray-900">
-                    {form.student.firstname} {form.student.lastname}
+              {forms
+                ?.filter((form) => form.status === "PENDING")
+                .map((form) => (
+                  <div
+                    key={form.id}
+                    onClick={() => setSelected(form)}
+                    className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition 
+          ${
+            selectedForm?.id === form.id
+              ? "bg-blue-50 border-blue-300"
+              : "hover:bg-gray-50 border-gray-200"
+          }`}
+                  >
+                    <div className="font-medium text-gray-900">
+                      {form.student.firstname} {form.student.lastname}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {new Date(form.submittedAt).toLocaleDateString()}
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500">
-                    {new Date(form.submittedAt).toLocaleDateString()}
-                  </div>
-                </div>
-              ))}
-              {!forms?.length && (
+                ))}
+              {!forms?.filter((form) => form.status === "PENDING").length && (
                 <div className="text-gray-400 text-sm p-3 bg-gray-50 rounded-xl border border-gray-200">
                   No forms submitted yet
                 </div>
               )}
             </div>
           </div>
-
-          {/* RIGHT COLUMN — Selected Form */}
           <div className="w-full lg:w-2/3 bg-white p-6 rounded-xl shadow-sm">
             {selectedForm ? (
               <>
-                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                   <h4 className="text-2xl font-semibold text-gray-900">
                     {selectedForm.student.firstname}{" "}
@@ -751,13 +776,17 @@ const Page = () => {
                   <div className="flex gap-2 mt-2">
                     <button
                       className="px-4 text-sm py-2 bg-gray-200 text-gray-800 font-medium rounded-md border border-gray-300 hover:bg-gray-300 transition"
-                      // onClick={() => handleReject(selectedForm?.id)}
+                      onClick={() => {
+                        Reject(selectedForm?.id);
+                      }}
                     >
                       Reject
                     </button>
                     <button
                       className="px-4 text-sm py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition"
-                      // onClick={() => handleAccept(selectedForm?.id)}
+                      onClick={() => {
+                        Accept(selectedForm?.id);
+                      }}
                     >
                       Accept
                     </button>
