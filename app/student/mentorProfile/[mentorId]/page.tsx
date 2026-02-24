@@ -21,14 +21,13 @@ import {
   } from "@/components/ui/carousel";
 
 const Page = ()=>{
-    const [date, setDate] = React.useState<Date | undefined>(
-    new Date(new Date().getFullYear(), new Date().getMonth(), 12)
-  )
+  
+   
 
 
     const [mentor, setMentor] = useState()
     const [course, setCourse] = useState([])
-    const [selectedCourse, setSelectedCourse] = useState<any>(null)
+    
     const {push} = useRouter()
     const params = useParams()
     const mentorId = params.mentorId
@@ -50,7 +49,7 @@ setMentor(res)
 fetchMentorId()
 mentorsCourses()
     },[])
-    console.log(date)
+
  
     return (
         <div className="min-h-screen bg-slate-50 md:flex">
@@ -88,7 +87,7 @@ mentorsCourses()
               {course?.map((cs: any) => (
                     <div
                       key={cs.id}
-                      onClick={() => setSelectedCourse(cs)}
+                      onClick={() => (push(`/student/mentorProfile/${mentorId}/${cs.id}`))}
                       className="border rounded-xl px-4 py-3 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
                     >
                       <span className="font-medium text-slate-800">
@@ -103,51 +102,11 @@ mentorsCourses()
 
                 </div>
               </div>
-              <Card size="sm" className="mx-auto w-fit">
-      <CardContent>
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={setDate}
-          className="p-0"
-        />
-      </CardContent>
      
-    </Card>
-    
             </main>
           </div>
     
-          {/* ================= MODAL WINDOW ================= */}
-          {selectedCourse && (
-            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-              <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl p-6 relative animate-fadeIn">
-    
-                <button
-                  onClick={() => setSelectedCourse(null)}
-                  className="absolute top-3 right-3 text-slate-500 hover:text-slate-800 text-xl"
-                >
-                  ✕
-                </button>
-    
-                <h2 className="text-2xl font-bold text-slate-800 mb-3">
-                  {selectedCourse.courseTitle}
-                </h2>
-    
-                <p className="text-slate-600 mb-4">
-                  {selectedCourse.courseInfo}
-                </p>
-    
-                <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
-                  <p className="font-semibold text-indigo-700">
-                    Price: {selectedCourse.paymentValue}
-                  </p>
-                </div>
-    
-              </div>
-            </div>
-          )}
-          {/* ================================================= */}
+          
     
         </div>
       )

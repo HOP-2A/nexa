@@ -18,6 +18,8 @@ const Page = () => {
   const { user: clerkUser } = useUser();
   const { user } = useAuth(clerkUser?.id);
   const [clubs, setClubs] = useState([])
+  const [studentBooked, setStudentBooked]= useState([])
+  
 
   const findAllmentors = async ()=>{
    const data =  await fetch("/api/mentor/findAllMentor",{
@@ -34,9 +36,20 @@ const Page = () => {
     setClubs(response)
 
   }
+  const fetchData= async () => {
+  const res = await fetch("/api/mentorAvailability/studentBooked", {
+      method: "POST",
+      body: JSON.stringify({
+        studentId:user?.id
+      }),
+    });
+    const response = await res.json();
+    setStudentBooked(response);
+  };
   useEffect(()=>{
 findAllmentors()
 fetchAllClubs()
+fetchData()
 console.log(clubs)
 if(clerkUser?.publicMetadata.role === "MENTOR"){
   push("/mentor/dashboard")
@@ -64,6 +77,15 @@ if(clerkUser?.publicMetadata.role === "MENTOR"){
             Learn, connect with mentors, and join top clubs 🚀
           </p>
         </div>
+        <section className="bg-white rounded-3xl shadow-sm p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold text-slate-800">
+              My reservations
+            </h2>
+            <div >{studentBooked.map((reservation,index)=>{
+              return <div key={index}>{reservation.startTime}</div>
+            })}</div>
+          </div>
   
           <div className="bg-white rounded-2xl shadow-sm p-6 overflow-hidden">
             <Carousel className="w-full">
