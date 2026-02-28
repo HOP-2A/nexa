@@ -2,7 +2,7 @@
 
 import { useUser } from "@clerk/nextjs";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -41,11 +41,28 @@ type ClubType = {
   }[];
 };
 
+type PostType = {
+  clubId: string;
+  content: string;
+  createdAt: string;
+  id: string;
+  image: string[];
+  status: string;
+  studentId: string;
+  title: string;
+  updatedAt: string;
+};
+
 const Page = () => {
   const params = useParams();
   const clubId = params.clubId as string;
   const [club, setClub] = useState<ClubType | null>(null);
   const { isLoaded, isSignedIn, user } = useUser();
+  const [caption, setCaption] = useState("");
+  const [details, setDetails] = useState("");
+  const [image, setImage] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [posts, setPosts] = useState<PostType[] | []>([]);
 
   useEffect(() => {
     if (!clubId || !user) return;
@@ -71,6 +88,65 @@ const Page = () => {
     const minutes = String(d.getUTCMinutes()).padStart(2, "0");
     return `${year}/${month}/${day} 🕒 ${hours}:${minutes}`;
   };
+
+  const fetchFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setFile(file);
+    const url = URL.createObjectURL(file);
+    setImage(url);
+  };
+
+  const handlecap = (e: ChangeEvent<HTMLInputElement>) => {
+    setCaption(e.target.value);
+  };
+
+  const handledef = (e: ChangeEvent<HTMLInputElement>) => {
+    setDetails(e.target.value);
+  };
+
+  const CreatePost = async () => {
+    const res = await fetch("/api/club-management/create-post", {
+      method: "POST",
+      body: JSON.stringify({
+        clubId: club?.id,
+        title: caption,
+        content: details,
+        studentClerk: user?.id,
+        image: image,
+      }),
+    });
+
+    if (res.ok) {
+      toast.success("Successfully created post");
+      setCaption("");
+      setDetails("");
+      setFile(null);
+      setImage("");
+    } else {
+      toast.error("Error");
+    }
+  };
+
+  useEffect(() => {
+    if (!clubId || !user) return;
+
+    const BringPost = async () => {
+      const res = await fetch(`/api/club-management/bring-posts/${club?.id}`, {
+        method: "GET",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setPosts(data);
+      } else {
+        toast.error("Somehting went wrong, refresh page");
+      }
+    };
+
+    BringPost;
+  }, [user, clubId, isLoaded]);
   return (
     <div className="min-h-screen bg-blue-50 px-6 py-8">
       <div className="max-w-4xl mx-auto">
@@ -219,6 +295,96 @@ const Page = () => {
               be notified when new updates are available.
             </p>
           </div>
+        </section>
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">Club Posts</h2>
+        <section className="mt-6 flex flex-col md:flex-row gap-4">
+          <section className="max-w-md p-6 bg-white rounded-lg shadow-md space-y-4">
+            <div className="text-xl font-semibold">Create new post</div>
+
+            <input
+              placeholder="Enter Caption..."
+              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => {
+                handlecap(e);
+              }}
+            />
+
+            <input
+              placeholder="Enter post details..."
+              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y h-fit text-wrap"
+              onChange={(e) => {
+                handledef(e);
+              }}
+            />
+
+            <label
+              htmlFor="image-upload"
+              className="block w-full cursor-pointer rounded-md border border-dashed border-gray-400 py-12 text-center text-gray-400 hover:border-blue-500 hover:text-blue-600 transition"
+            >
+              Click to upload image
+              <input
+                type="file"
+                id="image-upload"
+                accept="image/*"
+                className="hidden"
+                onChange={fetchFile}
+              />
+            </label>
+
+            <div className="w-full h-64 border border-gray-300 rounded-md flex items-center justify-center overflow-hidden bg-gray-50">
+              {image ? (
+                <img
+                  src={image}
+                  alt="Preview"
+                  className="object-contain w-full h-full"
+                />
+              ) : (
+                <span className="text-gray-400">
+                  Image preview will appear here
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => {
+                CreatePost();
+              }}
+              className="bg-white text-gray-800 border border-gray-300 rounded-md px-6 py-1 text-sm hover:bg-gray-100 transition-colors"
+            >
+              Post
+            </button>
+          </section>
+          <section className="flex-1 max-h-[600px] overflow-y-auto bg-white border border-gray-200 rounded-md p-4">
+            {posts?.length ? (
+              posts.map((post) => (
+                <div
+                  key={post.id}
+                  className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors"
+                >
+                  <h3 className="text-gray-900 font-semibold mb-1">
+                    {post.title}
+                  </h3>
+                  <p className="text-gray-700 text-sm mb-2">{post.content}</p>
+                  <div className="flex items-center">
+                    <div className="text-gray-500 text-xs">
+                      {new Date(post.createdAt).toLocaleDateString()}
+                    </div>
+
+                    <button className="ml-3 text-gray-600 text-xs hover:text-gray-900 transition-colors">
+                      💬 Comment
+                    </button>
+
+                    {post?.studentId === club?.presidentId && (
+                      <div className="text-gray-700 text-[12px] text-green-600 font-semibold mb-1 ml-3">
+                        President
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-center">No posts available.</p>
+            )}
+          </section>
         </section>
       </div>
     </div>
