@@ -3,17 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  {
-    params,
-  }: {
-    params: { studentId: string };
-  },
+  { params }: { params: Promise<{ studentId: string }> },
 ) {
   const { studentId } = await params;
+
   const student = await prisma.student.findFirst({
-    where: {
-      id: studentId,
-    },
+    where: { id: studentId },
   });
 
   if (!student) {
@@ -21,9 +16,7 @@ export async function GET(
   }
 
   const invites = await prisma.invites.findMany({
-    where: {
-      studentEmail: student?.email,
-    },
+    where: { studentEmail: student.email },
     include: {
       Student: {
         include: {
