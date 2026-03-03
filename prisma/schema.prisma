@@ -37,6 +37,7 @@ model Club {
   events         ClubEvent[]      @relation("ClubEvents")
   applications   ClubForm[]
   clubToStudents ClubToStudents[]
+  Post           Post[]
   students       Student[]        @relation("ClubToStudent")
 }
 
@@ -51,6 +52,8 @@ model Mentor {
   description          String?
   profilePic           String?
   experienceYears      String?
+  socialPlatform  String
+  profileLink       String
   courses              Course[]
   mentorAvailabilities MentorAvailability[]
   mentorStudent        MentorStudent[]
@@ -133,10 +136,13 @@ model Post {
   title     String
   content   String
   studentId String
+  clubId    String
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   status    PostStatus @default(MEMBER)
+  image     String[]
   comment   Comment[]
+  Club      Club       @relation(fields: [clubId], references: [id])
   Student   Student    @relation(fields: [studentId], references: [id])
 }
 

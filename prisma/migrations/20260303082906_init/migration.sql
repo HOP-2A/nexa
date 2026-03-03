@@ -10,6 +10,12 @@ CREATE TYPE "MentorshipStatus" AS ENUM ('ACTIVE', 'PAUSED', 'PENDING');
 -- CreateEnum
 CREATE TYPE "ApplicationStatus" AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED');
 
+-- CreateEnum
+CREATE TYPE "PostStatus" AS ENUM ('PRESIDENT', 'MEMBER');
+
+-- CreateEnum
+CREATE TYPE "SlotStatus" AS ENUM ('AVAILABLE', 'BOOKED', 'PENDING', 'CANCELED');
+
 -- CreateTable
 CREATE TABLE "Student" (
     "id" TEXT NOT NULL,
@@ -48,6 +54,8 @@ CREATE TABLE "Mentor" (
     "description" TEXT,
     "profilePic" TEXT,
     "experienceYears" TEXT,
+    "socialPlatform" TEXT NOT NULL,
+    "profileLink" TEXT NOT NULL,
 
     CONSTRAINT "Mentor_pkey" PRIMARY KEY ("id")
 );
@@ -121,6 +129,57 @@ CREATE TABLE "Course" (
 );
 
 -- CreateTable
+CREATE TABLE "Invites" (
+    "id" TEXT NOT NULL,
+    "studentEmail" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "inviterId" TEXT NOT NULL,
+
+    CONSTRAINT "Invites_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Post" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "studentId" TEXT NOT NULL,
+    "clubId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "status" "PostStatus" NOT NULL DEFAULT 'MEMBER',
+    "image" TEXT[],
+
+    CONSTRAINT "Post_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Comment" (
+    "id" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "studentId" TEXT NOT NULL,
+    "postId" TEXT NOT NULL,
+
+    CONSTRAINT "Comment_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "MentorAvailability" (
+    "id" TEXT NOT NULL,
+    "startTime" TEXT NOT NULL,
+    "endTime" TEXT NOT NULL,
+    "status" "SlotStatus" NOT NULL DEFAULT 'AVAILABLE',
+    "availableDate" TIMESTAMP(3) NOT NULL,
+    "mentorId" TEXT NOT NULL,
+    "courseId" TEXT NOT NULL,
+    "studentId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "MentorAvailability_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_ClubToStudent" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL,
@@ -172,6 +231,30 @@ ALTER TABLE "ClubToStudents" ADD CONSTRAINT "ClubToStudents_studentId_fkey" FORE
 
 -- AddForeignKey
 ALTER TABLE "Course" ADD CONSTRAINT "Course_mentorId_fkey" FOREIGN KEY ("mentorId") REFERENCES "Mentor"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Invites" ADD CONSTRAINT "Invites_inviterId_fkey" FOREIGN KEY ("inviterId") REFERENCES "Student"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Post" ADD CONSTRAINT "Post_clubId_fkey" FOREIGN KEY ("clubId") REFERENCES "Club"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Post" ADD CONSTRAINT "Post_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "Student"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Comment" ADD CONSTRAINT "Comment_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Comment" ADD CONSTRAINT "Comment_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "Student"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "MentorAvailability" ADD CONSTRAINT "MentorAvailability_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "MentorAvailability" ADD CONSTRAINT "MentorAvailability_mentorId_fkey" FOREIGN KEY ("mentorId") REFERENCES "Mentor"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "MentorAvailability" ADD CONSTRAINT "MentorAvailability_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "Student"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_ClubToStudent" ADD CONSTRAINT "_ClubToStudent_A_fkey" FOREIGN KEY ("A") REFERENCES "Club"("id") ON DELETE CASCADE ON UPDATE CASCADE;

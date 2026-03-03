@@ -89,7 +89,7 @@ const Page = () => {
         home={() => push("/student/dashboard")}
         members={() => push("/student/mentors")}
         account={() => push("/student/account/personalinfo")}
-        news={() => push("/student/news")}
+        news={() => push("/student/myClubs")}
       />
 
       {/* Main Content Area */}

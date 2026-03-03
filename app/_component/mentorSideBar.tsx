@@ -25,11 +25,6 @@ const MentorSideBar = ({ home, chat, account }: PropsType) => {
         Home
       </button>
 
-      <button onClick={() => { chat(); setOpen(false) }} className={`${baseBtn} ${idle}`}>
-        <MessageCircle size={18} />
-       chat
-      </button>
-
 
 
       <button onClick={() => { account(); setOpen(false) }} className={`${baseBtn} ${idle}`}>

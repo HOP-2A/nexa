@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   if (existingMentor || existingStudent) {
     throw new Error("User exists");
   }
-
+console.log(body)
   const clerk = await clerkClient();
 
   const createdClerkUser = await clerk.users.createUser({
@@ -45,6 +45,9 @@ export async function POST(req: NextRequest) {
         email,
         firstname: firstname,
         lastname: lastname,
+        socialPlatform:body.socialPlatform,
+        profileLink:body.profileLink
+      
       },
     });
     return NextResponse.json(createdUser);
