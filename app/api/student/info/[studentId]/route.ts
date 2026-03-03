@@ -1,26 +1,26 @@
-import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
-export async function GET(req: NextRequest, { params }: { params: { studentId: string } }){
-    const { studentId } = await params;
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ studentId: string }> },
+) {
+  const { studentId } = await context.params;
 
-    const student = await prisma.student.findFirst({
-        where: {
-            clerkId: studentId
-        },
-
+  const student = await prisma.student.findUnique({
+    where: { id: studentId },
+    include: {
+      clubToStudents: {
         include: {
-            clubToStudents: {
-                include: {
-                    Club: {
-                        include: {
-                            events: true
-                        }
-                    }
-                }
-            }
-        }
-    })
+          Club: {
+            include: {
+              events: true,
+            },
+          },
+        },
+      },
+    },
+  });
 
-    return NextResponse.json(student);
+  return NextResponse.json(student);
 }

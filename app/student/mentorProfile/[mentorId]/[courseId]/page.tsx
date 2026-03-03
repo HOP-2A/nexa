@@ -1,90 +1,116 @@
 "use client";
+
+import SideBar from "@/app/_component/sideBar";
+import { useParams, useRouter } from "next/navigation";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { CheckCircle, ChevronRight, Star } from "lucide-react";
+import { CardContent } from "@/components/ui/card";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/app/provider/authProvider";
+import { Button } from "@/components/ui/button";
+
 type AvailableDate = {
   status: string;
   startTime: string;
   endTime: string;
   id: string;
 };
-import SideBar from "@/app/_component/sideBar";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import {
-  BookOpen,
-  CheckCircle,
-  Clock,
-  CreditCard,
-  Star,
-  ChevronRight,
-} from "lucide-react";
-import React from "react";
-import { CardContent } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogTrigger,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { useUser } from "@clerk/nextjs";
-import { useAuth } from "@/app/provider/authProvider";
-import { Button } from "@/components/ui/button";
+
+type Course = {
+  courseTitle?: string;
+  courseInfo?: string;
+  paymentValue?: string | number;
+};
+
+type AuthUser = { id: string } | null;
 
 const Page = () => {
-  const [course, setCourse] = useState();
+  const { push } = useRouter();
+  const params = useParams<{ mentorId: string; courseId: string }>();
+
+  const courseId = params.courseId;
+
+  const [course, setCourse] = useState<Course | null>(null);
   const [availableDate, setAvailableDate] = useState<AvailableDate[]>([]);
-  const [date, setDate] = React.useState<Date | undefined>(
-    new Date(new Date().getFullYear(), new Date().getMonth(), 12)
+  const [date, setDate] = useState<Date | undefined>(
+    new Date(new Date().getFullYear(), new Date().getMonth(), 12),
   );
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = useMemo(() => {
+    const t = new Date();
+    t.setHours(0, 0, 0, 0);
+    return t;
+  }, []);
+
   const { user: clerkUser } = useUser();
-  const { user } = useAuth(clerkUser?.id);
-  const { push } = useRouter();
-  const params = useParams();
-  const courseId = params.courseId;
-  const fetchCourse = async () => {
+  const { user } = useAuth(clerkUser?.id) as { user: AuthUser };
+  const studentId = useMemo(() => user?.id ?? null, [user]);
+
+  const fetchCourse = useCallback(async () => {
     const res = await fetch(`/api/course/findOne/${courseId}`, {
       method: "GET",
     });
-    const response = await res.json();
-    setCourse(response);
-  };
 
-  console.log(course);
-  const fetchDates = async () => {
+    if (!res.ok) {
+      setCourse(null);
+      return;
+    }
+
+    const response: Course = await res.json();
+    setCourse(response ?? null);
+  }, [courseId]);
+
+  const fetchDates = useCallback(async () => {
     const res = await fetch("/api/mentorAvailability/mentorsDates", {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        courseId: courseId,
-        date: date,
+        courseId,
+        date,
       }),
     });
-    const response = await res.json();
-    setAvailableDate(response);
-  };
-  console.log(availableDate);
+
+    if (!res.ok) {
+      setAvailableDate([]);
+      return;
+    }
+
+    const response: AvailableDate[] = await res.json();
+    setAvailableDate(Array.isArray(response) ? response : []);
+  }, [courseId, date]);
+
   useEffect(() => {
     fetchCourse();
     fetchDates();
-  }, [date]);
-  console.log(date);
-  const handleBooking = async (id) => {
-    await fetch("/api/mentorAvailability/booking", {
-      method: "POST",
-      body: JSON.stringify({
-        id: id,
-        studentId: user?.id,
-      }),
-    });
-  };
+  }, [fetchCourse, fetchDates]);
+
+  const handleBooking = useCallback(
+    async (id: AvailableDate["id"]) => {
+      if (!studentId) return;
+
+      await fetch("/api/mentorAvailability/booking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          studentId,
+        }),
+      });
+
+      await fetchDates();
+    },
+    [studentId, fetchDates],
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 md:flex font-sans text-slate-900">
-      {/* Navigation Sidebar */}
       <SideBar
         home={() => push("/student/dashboard")}
         members={() => push("/student/mentors")}
@@ -92,9 +118,7 @@ const Page = () => {
         news={() => push("/student/news")}
       />
 
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-screen overflow-y-auto">
-        {/* Top Header / Breadcrumbs */}
         <header className="bg-white border-b border-slate-200 px-8 py-4 sticky top-0 z-10">
           <div className="flex items-center text-sm text-slate-500">
             <span className="cursor-pointer hover:text-indigo-600">
@@ -106,9 +130,7 @@ const Page = () => {
         </header>
 
         <main className="p-4 md:p-8 max-w-7xl mx-auto w-full space-y-6">
-          {/* 1. Hero Section: Title & Visual Hook */}
           <div className="relative overflow-hidden rounded-3xl bg-indigo-600 text-white shadow-xl shadow-indigo-200">
-            {/* Decorative Background Circles */}
             <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-white opacity-10 blur-3xl"></div>
             <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 rounded-full bg-indigo-400 opacity-20 blur-2xl"></div>
 
@@ -122,30 +144,30 @@ const Page = () => {
                     />
                     Premium Course
                   </div>
+
                   <h1 className="text-3xl md:text-5xl font-bold leading-tight tracking-tight">
                     {course?.courseTitle || "Course Title Loading..."}
                   </h1>
                 </div>
 
-                {/* Price Tag Badge (Mobile/Desktop distinct) */}
                 <div className="hidden md:block text-right">
                   <p className="text-indigo-200 text-sm mb-1">Total Value</p>
-                  <p className="text-4xl font-bold">{course?.paymentValue}</p>
+                  <p className="text-4xl font-bold">
+                    {course?.paymentValue ?? "-"}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* 2. Grid Layout: Info vs Action */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column: Course Description (Span 2) */}
             <div className="lg:col-span-2 space-y-8">
               <section className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
                 <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
                   About this Course
                 </h2>
+
                 <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed">
-                  {/* Rendering the courseInfo */}
                   {course?.courseInfo ? (
                     <p>{course.courseInfo}</p>
                   ) : (
@@ -155,7 +177,6 @@ const Page = () => {
                   )}
                 </div>
 
-                {/* Mock Features List for aesthetics */}
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
                   {["1hour", "Mentor Support"].map((item) => (
                     <div
@@ -169,7 +190,7 @@ const Page = () => {
                 </div>
               </section>
             </div>
-            {/* Right Column: Payment & Action (Span 1) */}
+
             <div className="space-y-6">
               <div className="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/50 border border-slate-100 sticky top-24">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -179,38 +200,38 @@ const Page = () => {
                       selected={date}
                       onSelect={setDate}
                       className="p-0"
-                      disabled={(date) => date < today}
+                      disabled={(d) => d < today}
                     />
                   </CardContent>
-                  {availableDate?.map((dates, index) => {
-                    console.log(dates.status);
-                    {
-                      return (
-                      dates.status === "AVAILABLE" && (
-                        <Dialog key={index}>
-                          <div className="bg-white border rounded-3xl p-5 shadow-sm">
-                            <div>
-                              <p>{dates.startTime}</p>
-                              <p>{dates.endTime}</p>
-                            </div>
 
-                            <DialogTrigger asChild>
-                              <Button variant='default'>
-                                Book Now
-                              </Button>
-                            </DialogTrigger>
+                  {availableDate.map((slot) =>
+                    slot.status === "AVAILABLE" ? (
+                      <Dialog key={slot.id}>
+                        <div className="bg-white border rounded-3xl p-5 shadow-sm">
+                          <div className="mb-3">
+                            <p>{slot.startTime}</p>
+                            <p>{slot.endTime}</p>
                           </div>
 
-                          <DialogContent>
-                            <DialogTitle>Confirm Booking</DialogTitle>
-                            <Button onClick={() => handleBooking(dates?.id)}>
-                              Confirm
+                          <DialogTrigger asChild>
+                            <Button variant="default" type="button">
+                              Book Now
                             </Button>
-                          </DialogContent>
-                        </Dialog>
-                      )
-                   ) }
-                  })}
+                          </DialogTrigger>
+                        </div>
+
+                        <DialogContent>
+                          <DialogTitle>Confirm Booking</DialogTitle>
+                          <Button
+                            type="button"
+                            onClick={() => handleBooking(slot.id)}
+                          >
+                            Confirm
+                          </Button>
+                        </DialogContent>
+                      </Dialog>
+                    ) : null,
+                  )}
                 </div>
 
                 <p className="text-xs text-center text-slate-400 mt-4">
@@ -218,11 +239,11 @@ const Page = () => {
                 </p>
               </div>
             </div>
-            ``
           </div>
         </main>
       </div>
     </div>
   );
 };
+
 export default Page;

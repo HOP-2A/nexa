@@ -150,7 +150,7 @@ const Page = () => {
   return (
     <div className="min-h-screen bg-blue-50 px-6 py-8">
       <div className="max-w-4xl mx-auto">
-        {/* Club Header */}
+
         <section className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -192,7 +192,7 @@ const Page = () => {
           </div>
         </section>
 
-        {/* Members */}
+
         <section className="mt-6 bg-white p-4 rounded-lg shadow-sm">
           <h2 className="text-lg font-semibold text-gray-900 mb-3">Members</h2>
 
@@ -231,7 +231,7 @@ const Page = () => {
           </div>
         </section>
 
-        {/* Events Overview */}
+
         <section className="mt-6">
           <div className="py-3 px-6 bg-white rounded-lg shadow-sm w-full sm:w-fit">
             <div className="flex justify-between items-center mb-3">

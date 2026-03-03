@@ -15,7 +15,9 @@ export default function Page() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleValue = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleValue = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setInputs((prev) => ({ ...prev, [name]: value }));
   };
@@ -35,12 +37,10 @@ export default function Page() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
       <div className="bg-white shadow-2xl rounded-2xl p-10 w-[420px] space-y-5">
-        
         <h2 className="text-3xl font-bold text-center text-gray-800">
           Create Account
         </h2>
 
-        {/* First Name */}
         <input
           name="firstname"
           placeholder="First Name"
@@ -48,7 +48,6 @@ export default function Page() {
           className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
         />
 
-        {/* Last Name */}
         <input
           name="lastname"
           placeholder="Last Name"
@@ -56,7 +55,6 @@ export default function Page() {
           className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
         />
 
-        {/* Email */}
         <input
           name="email"
           type="email"
@@ -65,7 +63,6 @@ export default function Page() {
           className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
         />
 
-        {/* Password with toggle */}
         <div className="relative">
           <input
             name="password"
@@ -83,7 +80,6 @@ export default function Page() {
           </button>
         </div>
 
-        {/* Styled Select */}
         <div>
           <label className="text-sm text-gray-600">I am a</label>
           <select
@@ -98,10 +94,10 @@ export default function Page() {
         </div>
 
         <div className="text-sm text-gray-600">
-          Signing up as: <span className="font-semibold text-indigo-600">{inputs.role}</span>
+          Signing up as:{" "}
+          <span className="font-semibold text-indigo-600">{inputs.role}</span>
         </div>
 
-        {/* Button */}
         <button
           onClick={Signup}
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-xl font-semibold transition duration-200 shadow-md"

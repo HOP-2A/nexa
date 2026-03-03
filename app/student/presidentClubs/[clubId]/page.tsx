@@ -721,7 +721,7 @@ const Page = () => {
           </section>
         </div>
         <section className="flex flex-col lg:flex-row gap-6 mt-6">
-          {/* LEFT COLUMN — Student Selection */}
+
           <div className="w-full lg:w-1/3 bg-white p-5 rounded-xl shadow-sm">
             <h4 className="text-lg font-semibold text-gray-900 mb-4">
               Submitted Forms
@@ -778,7 +778,7 @@ const Page = () => {
                   </span>
                 </div>
 
-                {/* Form Details */}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                   <div className="flex">
                     <p className="w-32 font-medium text-gray-500">
