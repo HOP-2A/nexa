@@ -414,7 +414,6 @@ const Page = () => {
         ) : (
           <section className="w-full max-w-4xl mx-auto bg-white border border-gray-200 rounded-lg p-6 text-sm mt-6">
             <div className="flex flex-col gap-6">
-              {/* Header */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-200 pb-4">
                 <div>
                   <h2 className="text-base font-medium text-gray-900">
@@ -429,7 +428,6 @@ const Page = () => {
                 </span>
               </div>
 
-              {/* Basic Info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-gray-500">Student ID</p>
@@ -452,10 +450,10 @@ const Page = () => {
                 </div>
               </div>
 
-              {/* Divider */}
+
               <div className="border-t border-gray-200" />
 
-              {/* Long Text Sections */}
+
               <div className="flex flex-col gap-5">
                 <div>
                   <p className="text-gray-500 mb-1">Skills</p>

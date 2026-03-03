@@ -17,7 +17,9 @@ export default function Page() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleValue = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleValue = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setInputs((prev) => ({ ...prev, [name]: value }));
   };

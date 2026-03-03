@@ -1,19 +1,31 @@
 "use client";
 
-import { Mentor } from "@prisma/client";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
+type Mentor = {
+  id: string;
+  firstname: string;
+  lastname: string;
+  profilePic: string | null;
+  rating?: number | null;
+  bio?: string | null;
+};
+
 const Page = () => {
   const [mentors, setMentors] = useState<Mentor[]>([]);
- const {push} = useRouter()
+  const { push } = useRouter();
+
   useEffect(() => {
     const fetchMentors = async () => {
-      const res = await fetch("/api/mentorGet");
-      if (!res.ok) throw new Error("Failed to fetch mentors");
-      const data = await res.json();
-      setMentors(data);
+      const res = await fetch("/api/mentorGet", { method: "GET" });
+      if (!res.ok) {
+        setMentors([]);
+        return;
+      }
+      const data: Mentor[] = await res.json();
+      setMentors(Array.isArray(data) ? data : []);
     };
 
     fetchMentors();
@@ -21,26 +33,20 @@ const Page = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-10">
-      <h1 className="mb-8 text-3xl font-bold text-gray-800">
-        List of Mentors
-      </h1>
+      <h1 className="mb-8 text-3xl font-bold text-gray-800">List of Mentors</h1>
 
-      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" 
- 
-      >
+      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {mentors.map((mentor) => (
-          <div
+          <button
             key={mentor.id}
-            className="flex flex-col items-center rounded-xl bg-white p-6 shadow-md transition hover:shadow-lg"
-            onClick={()=>{
-              push(`/student/mentorProfile/${mentor.id}`)
-            }}
+            type="button"
+            className="flex flex-col items-center rounded-xl bg-white p-6 shadow-md transition hover:shadow-lg text-left"
+            onClick={() => push(`/student/mentorProfile/${mentor.id}`)}
           >
-            
             <div className="relative mb-4 h-24 w-24 overflow-hidden rounded-full border">
               <Image
-                src={mentor.profilePic || "/default-avatar.svg"}
-                alt={`${mentor.firstname} ${mentor.lastname}`}  
+                src={mentor.profilePic ?? "/default-avatar.svg"}
+                alt={`${mentor.firstname} ${mentor.lastname}`}
                 fill
                 className="object-cover"
               />
@@ -50,15 +56,16 @@ const Page = () => {
               <p className="text-lg font-semibold text-gray-800">
                 {mentor.firstname} {mentor.lastname}
               </p>
-              
             </div>
-            <div>
-              {mentor.rating}
+
+            <div className="mt-2 text-sm text-gray-600">
+              Rating: {mentor.rating ?? "—"}
             </div>
-            <div>
-              {mentor.bio}
+
+            <div className="mt-2 text-sm text-gray-600 line-clamp-3 text-center">
+              {mentor.bio ?? "No bio yet."}
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>

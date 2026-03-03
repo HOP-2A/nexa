@@ -68,7 +68,6 @@ const SideBar = ({ home, members, news, account }: PropsType) => {
 
   return (
     <>
-      {/* ===== Mobile Top Bar ===== */}
       <div className="md:hidden flex items-center justify-between p-4 border-b bg-white">
         <h1 className="font-bold text-lg">Dashboard</h1>
         <button onClick={() => setOpen(true)}>
@@ -76,7 +75,6 @@ const SideBar = ({ home, members, news, account }: PropsType) => {
         </button>
       </div>
 
-      {/* ===== Overlay (mobile) ===== */}
       {open && (
         <div
           className="fixed inset-0 bg-black/40 z-40 md:hidden"
@@ -84,7 +82,6 @@ const SideBar = ({ home, members, news, account }: PropsType) => {
         />
       )}
 
-      {/* ===== Sidebar ===== */}
       <aside
         className={`
           fixed md:static top-0 left-0 h-screen w-64 bg-white border-r p-4 flex flex-col justify-between z-50
@@ -92,12 +89,10 @@ const SideBar = ({ home, members, news, account }: PropsType) => {
           ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
       >
-        {/* Top */}
         <div>
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-xl font-bold">Dashboard</h1>
 
-            {/* Close button (mobile only) */}
             <button className="md:hidden" onClick={() => setOpen(false)}>
               <X />
             </button>
@@ -108,7 +103,6 @@ const SideBar = ({ home, members, news, account }: PropsType) => {
           </nav>
         </div>
 
-        {/* Bottom */}
         <div className="text-xs text-gray-400 px-2">© 2026 Your App</div>
       </aside>
     </>
