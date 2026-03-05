@@ -35,15 +35,7 @@ const AccountSideBar = ({
           My Clubs
         </button>
 
-        <button onClick={settings} className={btn}>
-          <Settings size={16} />
-          Settings
-        </button>
-
-        <button onClick={paymentHistory} className={btn}>
-          <CreditCard size={16} />
-          Payments
-        </button>
+      
       </div>
     </aside>
   )
