@@ -50,12 +50,12 @@ const Page = () => {
         <div className="absolute -bottom-[10%] left-[20%] w-[50%] h-[40%] rounded-full bg-violet-200/30 blur-[120px]" />
       </div>
 
-      <MentorSideBar
-        home={() => push("/mentor/dashboard")}
-        chat={() => push("/mentor/chat")}
-        account={() => push("/mentor/dashboard/account")}
-      />
-
+     <MentorSideBar
+                home={() => push("/mentor/dashboard")}
+                chat={() => push("/mentor/chat")}
+                account={() => push("/mentor/dashboard/accounts")}
+                editProfile={()=>push("/mentor/dashboard/editProfile")}
+              /> 
       <main className="flex-1 relative z-10 flex flex-col p-6 md:p-10 gap-8 overflow-y-auto">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>

@@ -171,7 +171,6 @@ model MentorAvailability {
   mentor        Mentor     @relation(fields: [mentorId], references: [id])
   student       Student?   @relation(fields: [studentId], references: [id])
 }
-
 enum Ratings {
   FIVE
   FOUR
@@ -210,3 +209,4 @@ enum SlotStatus {
   PENDING
   CANCELED
 }
+
