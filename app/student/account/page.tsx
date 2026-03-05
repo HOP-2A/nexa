@@ -23,6 +23,8 @@ const Page = () => {
         myclubs={() => push("/student/myClubs")}
         settings={() => push("/student/account/settings")}
       />
+ 
+      {/* Main Content */}
       <main className="flex-1 p-6 md:p-10">
         <h1 className="text-4xl font-extrabold text-gray-900 mb-10 tracking-tight">
           Account Dashboard
@@ -60,5 +62,5 @@ const Page = () => {
     </div>
   );
 };
-
-export default Page;
+ 
+export default Page;  

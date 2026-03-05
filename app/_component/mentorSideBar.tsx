@@ -56,6 +56,10 @@ const MentorSideBar = ({ home, chat, account,editProfile }: PropsType) => {
         <User size={18} />
        Users
       </button>
+        <button onClick={() => { editProfile(); setOpen(false) }} className={`${baseBtn} ${idle}`}>
+        <User size={18} />
+       Users
+      </button>
     </>
   );
 
