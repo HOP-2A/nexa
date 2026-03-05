@@ -9,6 +9,9 @@ const allDates =  await prisma.mentorAvailability.findMany({
 where:{
  studentId:body.studentId,
  status:"BOOKED"
+},
+include:{
+  mentor:true
 }
 })
 return NextResponse.json(allDates);

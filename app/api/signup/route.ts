@@ -46,7 +46,9 @@ console.log(body)
         firstname: firstname,
         lastname: lastname,
         socialPlatform:body.socialPlatform,
-        profileLink:body.profileLink
+        profileLink:body.profileLink,
+        bio:body.bio,
+        experienceYears:body.experience
       
       },
     });
