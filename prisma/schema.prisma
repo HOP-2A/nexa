@@ -166,24 +166,11 @@ model Comment {
   Post      Post    @relation(fields: [postId], references: [id])
 }
 
-model MentorAvailability {
-  id            String     @id @default(cuid())
-  startTime     String
-  endTime       String
-  status        SlotStatus @default(AVAILABLE)
-  availableDate DateTime
-  mentorId      String
-  mentor        Mentor     @relation(fields: [mentorId], references: [id])
-  courseId      String
-  course        Course     @relation(fields: [courseId], references: [id])
 
-  studentId String?
-  student   Student? @relation(fields: [studentId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum PostStatus {
+ PRESIDENT 
+ MEMBER
 }
-
 enum Ratings {
   FIVE
   FOUR
@@ -217,3 +204,4 @@ enum SlotStatus {
   PENDING   
   CANCELED   
 }
+

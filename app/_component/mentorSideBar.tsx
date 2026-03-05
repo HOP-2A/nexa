@@ -1,15 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { Home, Users, MessageCircle, User, Menu, X } from "lucide-react"
+import { Home,Users,  MessageCircle, User, Menu, X } from "lucide-react"
 
 type PropsType = {
   home: () => void
  chat: () => void
   account: () => void
+  editProfile:()=>void
 }
 
-const MentorSideBar = ({ home, chat, account }: PropsType) => {
+const MentorSideBar = ({ home, chat, account,editProfile }: PropsType) => {
   const [open, setOpen] = useState(false)
 
   const baseBtn =
@@ -35,6 +36,10 @@ const MentorSideBar = ({ home, chat, account }: PropsType) => {
       <button onClick={() => { account(); setOpen(false) }} className={`${baseBtn} ${idle}`}>
         <User size={18} />
        Account
+      </button>
+        <button onClick={() => { editProfile(); setOpen(false) }} className={`${baseBtn} ${idle}`}>
+        <User size={18} />
+       Users
       </button>
     </>
   )
