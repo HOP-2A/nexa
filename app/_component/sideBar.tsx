@@ -50,7 +50,7 @@ const SideBar = ({ home, members, news, account }: PropsType) => {
         className={`${baseBtn} ${idle}`}
       >
         <Newspaper size={18} />
-        News
+        My Clubs
       </button>
 
       <button

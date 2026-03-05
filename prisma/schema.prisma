@@ -52,6 +52,8 @@ model Mentor {
   description          String?
   profilePic           String?
   experienceYears      String?
+  socialPlatform  String?
+  profileLink       String?
   courses              Course[]
   mentorAvailabilities MentorAvailability[]
   mentorStudent        MentorStudent[]
@@ -139,10 +141,10 @@ model Post {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   status    PostStatus @default(MEMBER)
-  comment   Comment[]
-  Student   Student    @relation(fields: [studentId], references: [id])
-  Club      Club       @relation(fields: [clubId], references: [id])
   image     String[]
+  comment   Comment[]
+  Club      Club       @relation(fields: [clubId], references: [id])
+  Student   Student    @relation(fields: [studentId], references: [id])
 }
 
 model Comment {
