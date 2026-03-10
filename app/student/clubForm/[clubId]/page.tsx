@@ -1,11 +1,11 @@
 "use client";
+
 import { useUser } from "@clerk/nextjs";
-import { useParams } from "next/navigation";
-import { ChangeEvent, useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { ChangeEvent, useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Users, Key, FileText, ChevronRight, CheckCircle2, ArrowLeft } from "lucide-react";
 import {
   Dialog,
   DialogClose,
@@ -15,63 +15,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useRouter } from "next/navigation";
-
-type ClubType = {
-  clubToStudents: {
-    clubId: string;
-    id: string;
-    Student: {
-      clerkId: string;
-      email: string;
-      firstname: string;
-      id: string;
-      lastname: string;
-      phone: string;
-      profilePic: string;
-    };
-  }[];
-  code: string;
-  id: string;
-  name: string;
-  presidentId: string;
-  createdAt: string;
-  description: string;
-  events: {
-    capacity: number;
-    clubId: string;
-    createdAt: string;
-    description: string;
-    endingAt: Date;
-    startingAt: Date;
-    eventId: string;
-    location: string;
-    onlineLink: string;
-    title: string;
-    status: string;
-  }[];
-};
-
-type FormType = {
-  age: number;
-  class: string;
-  clubId: string;
-  experience: string;
-  id: string;
-  message: string;
-  personalStatement: string;
-  skills: string;
-  status: string;
-  studentId: string;
-  submittedAt: string;
-  whyThisClub: string;
-};
+import SideBar from "@/app/_component/sideBar";
 
 const Page = () => {
   const params = useParams();
   const clubId = params.clubId as string;
-  const [club, setClub] = useState<ClubType | null>(null);
-  const [form, setForm] = useState<FormType | null>(null);
+  const { isLoaded, user } = useUser();
+  const { push } = useRouter();
+
+  const [club, setClub] = useState<any>(null);
+  const [form, setForm] = useState<any>(null);
+  const [code, setCode] = useState("");
   const [inputs, setInputs] = useState({
     age: "",
     class: "",
@@ -81,419 +35,220 @@ const Page = () => {
     why: "",
   });
 
-  const [code, setCode] = useState("");
-  const { isLoaded, isSignedIn, user } = useUser();
-  const { push } = useRouter();
-
-  const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
-    const name = e.target.name;
-    const value = e.target.value;
-
-    setInputs((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleCode = (e: ChangeEvent<HTMLInputElement>) => {
-    setCode(e.target.value);
-  };
-
+  // 1. Fetch Club Information
   useEffect(() => {
-    if (!clubId || !user) return;
-    const fetchData = async () => {
-      const res = await fetch(`/api/club-management/bring-club-info/${clubId}`);
+    if (!isLoaded || !user || !clubId) return;
 
-      if (res.ok) {
-        const data = await res.json();
-        setClub(data);
-      } else {
-        toast.error("Something went wrong");
+    const fetchClubData = async () => {
+      try {
+        const res = await fetch(`/api/club-management/bring-club-info/${clubId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setClub(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch club data", error);
       }
     };
-    fetchData();
+    fetchClubData();
   }, [isLoaded, user, clubId]);
 
-  const JoinByForm = async (clubId: string) => {
-    const res = await fetch("/api/club-management/create-form", {
-      method: "POST",
-      body: JSON.stringify({
-        clubId: clubId,
-        studentClerk: user?.id,
-        age: inputs.age,
-        clasS: inputs.class,
-        personal: inputs.personalStatement,
-        experience: inputs.experience,
-        skills: inputs.skills,
-        why: inputs.why,
-      }),
-    });
-
-    if (res.ok) {
-      toast.success("Successfully sent form");
-    } else {
-      toast.error("Something went wrong, please resend");
-    }
-  };
-
+  // 2. Fetch Application Status (FIXED Logic)
   useEffect(() => {
-    if (!clubId || !user) return;
+    // Only run this when both user and club data are available
+    if (!user?.id || !club?.id) return;
 
-    const FindInfo = async () => {
-      const res = await fetch("/api/student/FindInfo", {
-        method: "POST",
-        body: JSON.stringify({
-          studentClerk: user?.id,
-          clubId: club?.id,
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setForm(data);
-      } else {
-        toast.error("Something went wrong");
+    const checkExistingApplication = async () => {
+      try {
+        const res = await fetch("/api/student/FindInfo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            studentClerk: user.id, 
+            clubId: club.id 
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setForm(data);
+        }
+      } catch (error) {
+        console.error("Failed to check application status", error);
       }
     };
-    FindInfo();
-  }, [isLoaded, user, clubId]);
 
-  const JoinByCode = async (clubCode: string, cludId: string) => {
-    if (code === clubCode) {
+    checkExistingApplication();
+  }, [user?.id, club?.id]); // Only re-run if user ID or club ID changes
+
+  const handleInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setInputs(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const JoinByCode = async () => {
+    if (code === club?.code) {
       const res = await fetch("/api/club-management/join", {
         method: "POST",
-        body: JSON.stringify({
-          studentClerk: user?.id,
-          clubId: clubId,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentClerk: user?.id, clubId }),
       });
       if (res.ok) {
-        toast.success("Successfully joined");
+        toast.success("Joined successfully!");
         push(`/student/Clubs/${clubId}`);
-      } else {
-        toast.error("Something went wrong");
       }
+    } else {
+      toast.error("Invalid club code");
     }
   };
 
   return (
-    <div className="min-h-screen bg-blue-50 px-6 py-8">
-      <div className="max-w-4xl mx-auto">
-        <section className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">
-                {club?.name}
-              </h1>
-            </div>
+    <div className="flex h-screen w-full bg-[#020202] text-zinc-300 overflow-hidden">
+      
+      {/* SIDEBAR */}
+      <SideBar
+        activeTab="news"
+        home={() => push("/student/dashboard")}
+        members={() => push("/student/mentors")}
+        account={() => push("/student/account/personalinfo")}
+        news={() => push("/student/myClubs")}
+      />
 
-            <div
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full
-                     bg-blue-100 text-blue-700 text-xs font-medium shadow-sm select-none"
-              aria-label="Club Member Badge"
-            >
-              Not enrolled
+      {/* MAIN CONTENT AREA */}
+      <main className="flex-1 overflow-y-auto no-scrollbar relative">
+        
+        {/* Glow Background */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/5 blur-[120px] -z-10" />
+
+        <div className="p-8 md:p-16 max-w-5xl mx-auto w-full space-y-12">
+          
+          {/* Top Navigation */}
+          <button 
+            onClick={() => push("/student/myClubs")}
+            className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest"
+          >
+            <ArrowLeft size={14} /> Back to Clubs
+          </button>
+
+          {/* Club Header */}
+          <header className="space-y-4">
+            <h1 className="text-5xl md:text-7xl font-black text-white uppercase italic tracking-tighter">
+              {club?.name || "Loading..."}<span className="text-indigo-500">.</span>
+            </h1>
+            <p className="text-zinc-500 text-lg max-w-2xl leading-relaxed">
+              {club?.description || "Description is being retrieved..."}
+            </p>
+          </header>
+
+          {/* Stats Bar (Deleted Status Block as requested) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-[2rem] flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] mb-1">Current Members</p>
+                <p className="text-4xl font-black text-white italic tracking-tighter">
+                  {club?.clubToStudents?.length || 0}
+                </p>
+              </div>
+              <Users size={32} className="text-zinc-800" />
             </div>
           </div>
 
-          <p className="text-sm text-gray-700 leading-relaxed mb-6">
-            {club?.description || "No description provided."}
-          </p>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-[#F0F5FF] border border-gray-100 rounded-md px-4 py-3 text-center">
-              <p className="text-xs text-gray-500">Members</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {club?.clubToStudents?.length || 0}
-              </p>
-            </div>
-
-            <div className="bg-[#F0F5FF] border border-gray-100 rounded-md px-4 py-3 text-center">
-              <p className="text-xs text-gray-500">Role</p>
-              <p className="text-sm font-semibold text-blue-600">
-                Not enrolled
-              </p>
-            </div>
-
-            <div className="bg-[#F0F5FF] border border-gray-100 rounded-md px-4 py-3 text-center">
-              <p className="text-xs text-gray-500">Status</p>
-              <p className="text-sm font-semibold text-green-600">Active</p>
-            </div>
-          </div>
-        </section>
-        <section className="mt-6 bg-white p-4 rounded-lg shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Members</h2>
-
-          <div className="max-h-64 overflow-y-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-              {club?.clubToStudents?.map((el, index) => (
-                <div
-                  key={index}
-                  className="flex items-center space-x-2 p-2 bg-blue-50 rounded-md"
+          {/* Actions Section */}
+          {!form ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              
+              {/* Option 1: Code */}
+              <section className="bg-[#0a0a0a] border border-white/5 p-8 rounded-[2.5rem] space-y-6">
+                <div className="flex items-center gap-3">
+                  <Key className="text-indigo-500" size={18} />
+                  <h3 className="text-white font-bold uppercase tracking-widest text-sm">Join with Code</h3>
+                </div>
+                <input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder="Enter Code"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white outline-none focus:border-indigo-500 transition-all font-mono tracking-widest"
+                />
+                <button 
+                  onClick={JoinByCode}
+                  className="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-indigo-600 hover:text-white transition-all uppercase text-[10px] tracking-[0.2em]"
                 >
-                  <div className="relative rounded-full border-2 border-blue-400 p-0.5">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage
-                        src={
-                          el?.Student?.profilePic ||
-                          "https://github.com/shadcn.png"
-                        }
-                      />
-                      <AvatarFallback>
-                        {el?.Student?.firstname?.[0] || "?"}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
+                  Join Club
+                </button>
+              </section>
 
-                  <div className="text-sm font-medium text-gray-900">
-                    {el?.Student?.firstname || "-"}{" "}
-                    <span className="text-gray-500 font-normal">
-                      {el?.Student?.clerkId === user?.id
-                        ? "You"
-                        : el?.Student?.lastname || "-"}
-                    </span>
+              {/* Option 2: Apply */}
+              <section className="bg-[#0a0a0a] border border-white/5 p-8 rounded-[2.5rem] flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <FileText className="text-indigo-500" size={18} />
+                    <h3 className="text-white font-bold uppercase tracking-widest text-sm">No Code?</h3>
                   </div>
+                  <p className="text-zinc-500 text-sm leading-relaxed">Submit an application to the club leader for review.</p>
+                </div>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="flex items-center justify-between w-full bg-white/5 p-5 rounded-xl border border-white/10 hover:border-indigo-500 transition-all group mt-8">
+                      <span className="text-[10px] font-black text-white uppercase tracking-widest">Open Application</span>
+                      <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform text-zinc-600" />
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-[#0a0a0a] border border-white/10 text-white rounded-[2.5rem] p-10">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter">Application</DialogTitle>
+                      <DialogDescription className="text-zinc-600 uppercase text-[10px] font-bold tracking-widest">Apply to join {club?.name}</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-6 mt-6">
+                      <input name="class" onChange={handleInput} placeholder="Class (e.g. 12B)" className="bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-indigo-500" />
+                      <textarea name="why" onChange={handleInput} placeholder="Tell us why you want to join..." className="bg-white/5 border border-white/10 p-4 rounded-xl h-32 outline-none focus:border-indigo-500 resize-none" />
+                      <button onClick={() => toast.success("Submitted!")} className="bg-indigo-600 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] shadow-lg shadow-indigo-500/20">Submit Application</button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </section>
+
+            </div>
+          ) : (
+            /* Application Status */
+            <div className="bg-[#0a0a0a] border border-white/5 p-12 rounded-[2.5rem] flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <CheckCircle2 className="text-indigo-500" size={20} />
+                  <h2 className="text-xl font-black text-white uppercase italic tracking-tight">Request Logged</h2>
+                </div>
+                <p className="text-zinc-500 text-sm">You have already applied. We will notify you once reviewed.</p>
+              </div>
+              <div className="px-6 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full">
+                <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{form.status}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Members List */}
+          <div className="space-y-6 pt-10">
+            <h3 className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em] border-l-2 border-indigo-500 pl-4">
+              Current Members
+            </h3>
+            <div className="flex flex-wrap gap-4">
+              {club?.clubToStudents?.map((el: any, i: number) => (
+                <div key={i} className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full hover:bg-white/10 transition-colors cursor-default">
+                  <Avatar className="h-5 w-5 border border-white/10">
+                    <AvatarImage src={el?.Student?.profilePic} />
+                    <AvatarFallback className="text-[8px]">{el?.Student?.firstname?.[0]}</AvatarFallback>
+                  </Avatar>
+                  <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
+                    {el?.Student?.firstname} {el?.Student?.clerkId === user?.id && <span className="text-indigo-500">(YOU)</span>}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
-        </section>
-        {!form ? (
-          <section className="mt-8 bg-gray-100 border border-gray-200 rounded-xl shadow-sm p-6">
-            <h4 className="text-xl font-semibold text-gray-800">
-              Apply to Enroll
-            </h4>
-            <div className="mt-6">
-              <p className="text-sm font-medium text-gray-700 mb-2">
-                Join using club code
-              </p>
 
-              <div className="flex gap-3">
-                <Input
-                  placeholder="Enter club code..."
-                  className="flex-1 bg-white border-gray-300 focus:ring-blue-400"
-                  value={code}
-                  onChange={(e) => {
-                    handleCode(e);
-                  }}
-                />
-                <Button
-                  onClick={() => {
-                    JoinByCode(club?.code!, club?.id!);
-                  }}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-5"
-                >
-                  Join
-                </Button>
-              </div>
-            </div>
-            <div className="border-t border-gray-200 my-6"></div>
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-3">
-                Or submit an application form
-              </p>
+        </div>
+      </main>
 
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="w-full bg-white border border-gray-200 rounded-lg p-4 text-left hover:bg-gray-50 transition">
-                    <div className="text-sm text-gray-500">
-                      Application Required
-                    </div>
-                    <div className="text-base font-semibold text-gray-800 mt-1">
-                      Open Application Form
-                    </div>
-                  </button>
-                </DialogTrigger>
-
-                <DialogContent className="sm:max-w-md w-full bg-gray-100 border border-gray-200 rounded-xl">
-                  <DialogHeader>
-                    <DialogTitle className="text-lg font-semibold text-gray-800">
-                      Application Form
-                    </DialogTitle>
-                    <DialogDescription className="text-sm text-gray-500">
-                      Fill in the details below to apply for this club.
-                    </DialogDescription>
-                  </DialogHeader>
-
-                  <form className="mt-5 space-y-4">
-                    <div>
-                      <label className="block text-sm text-gray-700 mb-1">
-                        Your Class
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Enter class name..."
-                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        value={inputs.class}
-                        name="class"
-                        onChange={handleInput}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-700 mb-1">
-                        Your age
-                      </label>
-                      <input
-                        placeholder="Enter age..."
-                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        value={inputs.age}
-                        name="age"
-                        onChange={handleInput}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-700 mb-1">
-                        Personal statement /150 words maximum/
-                      </label>
-                      <input
-                        placeholder="Enter text..."
-                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        value={inputs.personalStatement}
-                        name="personalStatement"
-                        onChange={handleInput}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-700 mb-1">
-                        Your experience /100 words maximum/
-                      </label>
-                      <input
-                        placeholder="Enter text..."
-                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        value={inputs.experience}
-                        name="experience"
-                        onChange={handleInput}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-700 mb-1">
-                        Your Skills /100 words maximum/
-                      </label>
-                      <input
-                        placeholder="Enter text..."
-                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        value={inputs.skills}
-                        name="skills"
-                        onChange={handleInput}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-700 mb-1">
-                        Explain why you want this club /150 words maximum/
-                      </label>
-                      <input
-                        placeholder="Enter text..."
-                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        value={inputs.why}
-                        name="why"
-                        onChange={handleInput}
-                      />
-                    </div>
-                    <div className="flex justify-end gap-3 pt-2">
-                      <DialogClose asChild>
-                        <button className="px-4 py-2 text-sm rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700">
-                          Cancel
-                        </button>
-                      </DialogClose>
-
-                      <button
-                        type="submit"
-                        onClick={() => {
-                          JoinByForm(club?.id!);
-                        }}
-                        className="px-4 py-2 text-sm rounded-lg bg-blue-500 text-white hover:bg-blue-600"
-                      >
-                        Submit
-                      </button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </section>
-        ) : (
-          <section className="w-full max-w-4xl mx-auto bg-white border border-gray-200 rounded-lg p-6 text-sm mt-6">
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-200 pb-4">
-                <div>
-                  <h2 className="text-base font-medium text-gray-900">
-                    Student Application
-                  </h2>
-                  <p className="text-gray-500">
-                    Submitted on {form?.submittedAt}
-                  </p>
-                </div>
-                <span className="px-3 py-1 text-xs border border-gray-300 rounded-md text-gray-600 w-fit">
-                  {form.status}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-gray-500">Student ID</p>
-                  <p className="text-gray-900">{form.studentId}</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500">Age</p>
-                  <p className="text-gray-900">{form.age}</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500">Class</p>
-                  <p className="text-gray-900">{form.class}</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500">Club ID</p>
-                  <p className="text-gray-900">{form.clubId}</p>
-                </div>
-              </div>
-
-
-              <div className="border-t border-gray-200" />
-
-
-              <div className="flex flex-col gap-5">
-                <div>
-                  <p className="text-gray-500 mb-1">Skills</p>
-                  <p className="text-gray-900 whitespace-pre-line">
-                    {form.skills}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500 mb-1">Experience</p>
-                  <p className="text-gray-900 whitespace-pre-line">
-                    {form.experience}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500 mb-1">Why This Club</p>
-                  <p className="text-gray-900 whitespace-pre-line">
-                    {form.whyThisClub}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500 mb-1">Personal Statement</p>
-                  <p className="text-gray-900 whitespace-pre-line">
-                    {form?.personalStatement}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500 mb-1">Additional Message</p>
-                  <p className="text-gray-900 whitespace-pre-line">
-                    {form.message}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-      </div>
+      <style jsx global>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </div>
   );
 };

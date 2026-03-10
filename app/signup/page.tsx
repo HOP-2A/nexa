@@ -1,10 +1,12 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronRight, ShieldCheck, Globe, Sparkles, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 
-export default function Page() {
+export default function SignupPage() {
   const router = useRouter();
-
   const [inputs, setInputs] = useState({
     firstname: "",
     lastname: "",
@@ -13,27 +15,27 @@ export default function Page() {
     password: "",
     socialPlatform: "",
     profileLink: "",
-    experienceYears:"",
-    bio:""
-  }); 
-
+    experienceYears: "",
+    bio: ""
+  });
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleValue = (
-    e: React.ChangeEvent<
-    HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-  >
-  ) => {
+  const handleValue = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setInputs((prev) => ({ ...prev, [name]: value }));
   };
 
+  const setRole = (role: string) => setInputs((prev) => ({ ...prev, role }));
 
-  const setValue = (name: string, value: string) => {
-    setInputs((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const Signup = async () => {
+  
+  const onSignup = async () => {
+    setIsLoading(true);
+    // Simulate API call delay for UX
+    setTimeout(() => {
+        setIsLoading(false);
+        // router.push("/success"); 
+    }, 1500);
     const res = await fetch("/api/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -45,257 +47,189 @@ export default function Page() {
     }
   };
 
-  console.log(inputs);
+  const isMentorInvalid = inputs.role === "MENTOR" && (!inputs.socialPlatform || !inputs.profileLink);
 
-  const isMentorMissingPlatform =
-    inputs.role === "MENTOR" && !inputs.socialPlatform?.trim();
-
-  const isMentorMissingLink =
-    inputs.role === "MENTOR" &&
-    inputs.socialPlatform &&
-    !inputs.profileLink?.trim();
-
-  const isMentorInvalid =
-    inputs.role === "MENTOR" &&
-    (!inputs.socialPlatform?.trim() || !inputs.profileLink?.trim());
-
-    return (
-      <div className="min-h-screen grid lg:grid-cols-2 bg-white font-sans text-slate-900">
-        
-        {/* LEFT SIDE: Form Container */}
-        <div className="flex flex-col justify-center px-8 sm:px-16 lg:px-24 xl:px-32 py-12">
-          <div className="max-w-md w-full mx-auto space-y-10">
-    
-            {/* Branding */}
-            <div className="flex items-center gap-2 cursor-pointer group">
-              <div className="h-10 w-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200 group-hover:bg-indigo-700 transition-colors">
-                S
-              </div>
-              <span className="text-xl font-bold tracking-tight">
-                StudentPlatform
-              </span>
+  return (
+    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-indigo-500/30 flex items-stretch overflow-hidden">
+      
+      {/* LEFT SIDE: The Form Section */}
+      <div className="w-full lg:w-[50%] xl:w-[45%] flex flex-col justify-center px-6 sm:px-12 md:px-20 py-12 z-10 bg-[#050505] border-r border-white/5">
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="max-w-[440px] w-full mx-auto"
+        >
+          {/* Logo Section */}
+          <div className="flex items-center gap-3 mb-10">
+            <div className="h-9 w-9 bg-indigo-600 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(79,70,229,0.5)]">
+              <span className="font-black text-lg">S</span>
             </div>
-    
-            {/* Header */}
-            <header className="space-y-2">
-              <h1 className="text-4xl font-black tracking-tighter">
-                Create your account
-              </h1>
-              <p className="text-slate-500 font-medium text-sm">
-                Please provide your details to get started.
-              </p>
-            </header>
-    
-            <div className="space-y-6">
-    
-              {/* Role Switcher */}
-              <div className="p-1 bg-slate-100 rounded-2xl flex border border-slate-200">
-                <button
-                  onClick={() => setValue("role", "STUDENT")}
-                  className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-200 ${
-                    inputs.role === "STUDENT"
-                      ? "bg-white text-indigo-600 shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
-                  }`}
-                >
-                  Student
-                </button>
-    
-                <button
-                  onClick={() => setValue("role", "MENTOR")}
-                  className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-200 ${
-                    inputs.role === "MENTOR"
-                      ? "bg-white text-indigo-600 shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
-                  }`}
-                >
-                  Mentor
-                </button>
-              </div>
-    
-              {/* Name Section */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                    First Name
-                  </label>
-                  <input
-                    name="firstname"
-                    placeholder="Jane"
-                    onChange={handleValue}
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all"
-                  />
-                </div>
-    
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                    Last Name
-                  </label>
-                  <input
-                    name="lastname"
-                    placeholder="Doe"
-                    onChange={handleValue}
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all"
-                  />
-                </div>
-              </div>
-    
-              {/* Email */}
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                  Email Address
-                </label>
-                <input
-                  name="email"
-                  type="email"
-                  placeholder="jane@example.com"
-                  onChange={handleValue}
-                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all"
-                />
-              </div>
-    
-              {/* MENTOR SPECIFIC FIELDS */}
+            <span className="text-lg font-bold tracking-tight text-white/90">StudentPlatform</span>
+          </div>
+
+          <div className="space-y-2 mb-10">
+            <h1 className="text-3xl font-bold tracking-tight text-white">Create an account</h1>
+            <p className="text-slate-500 text-sm">Enter your details to join our professional network.</p>
+          </div>
+
+          {/* Precision Role Switcher */}
+          <div className="flex p-1 bg-white/[0.03] border border-white/10 rounded-xl mb-8 relative">
+            {["STUDENT", "MENTOR"].map((r) => (
+              <button
+                key={r}
+                onClick={() => setRole(r)}
+                className={`flex-1 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-[0.1em] z-10 transition-colors duration-300 ${
+                  inputs.role === r ? "text-white" : "text-slate-500 hover:text-slate-300"
+                }`}
+              >
+                {r}
+              </button>
+            ))}
+            <motion.div
+              className="absolute top-1 bottom-1 left-1 bg-white/[0.07] border border-white/10 rounded-lg shadow-xl"
+              initial={false}
+              animate={{
+                x: inputs.role === "STUDENT" ? "0%" : "100%",
+                width: "49%",
+              }}
+              transition={{ type: "spring", stiffness: 400, damping: 35 }}
+            />
+          </div>
+
+          <div className="space-y-5">
+            {/* Name Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <InputGroup label="First Name" name="firstname" onChange={handleValue} placeholder="Jane" icon={<User size={14}/>} />
+              <InputGroup label="Last Name" name="lastname" onChange={handleValue} placeholder="Doe" />
+            </div>
+
+            {/* Email */}
+            <InputGroup label="Email Address" name="email" type="email" onChange={handleValue} placeholder="name@company.com" icon={<Mail size={14}/>} />
+
+            {/* Conditional Mentor Fields */}
+            <AnimatePresence>
               {inputs.role === "MENTOR" && (
-                <div className="space-y-5 animate-in fade-in slide-in-from-top-4 duration-300">
-                  
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-5 pt-2"
+                >
                   <div className="grid grid-cols-2 gap-4">
-                    {/* Social Platform Selection */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                        Platform
-                      </label>
-                      <select
-                        name="socialPlatform"
-                        value={inputs.socialPlatform}
-                        onChange={handleValue}
-                        className={`w-full p-4 bg-slate-50 border rounded-xl outline-none transition-all text-sm ${
-                          isMentorMissingPlatform
-                            ? "border-red-400 focus:ring-2 focus:ring-red-100"
-                            : "border-slate-200 focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600"
-                        }`}
-                      >
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-semibold text-slate-500 uppercase ml-1">Platform</label>
+                      <select name="socialPlatform" onChange={handleValue} className="custom-select">
                         <option value="">Select...</option>
-                        <option value="facebook">Facebook</option>
-                        <option value="instagram">Instagram</option>
-                        <option value="linkedin">LinkedIn</option>
+                        <option value="linkedin">Facebook</option>
+                        <option value="twitter">X / Twitter</option>
+                        <option value="github">Instagram</option>
                       </select>
                     </div>
-    
-                    {/* Experience Year (String) */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                        Experience
-                      </label>
-                      <input
-                        name="experience"
-                        type="text"
-                        placeholder="e.g. 5+ Years"
-                        onChange={handleValue}
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all text-sm"
-                      />
-                    </div>
+                    <InputGroup label="Experience" name="experienceYears" onChange={handleValue} placeholder="e.g. 4 years" />
                   </div>
-    
-                  {/* Profile Link (Conditional on Platform) */}
-                  {inputs.socialPlatform && (
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                        {inputs.socialPlatform} Profile URL
-                      </label>
-                      <input
-                        name="profileLink"
-                        placeholder="https://..."
-                        value={inputs.profileLink}
-                        onChange={handleValue}
-                        className={`w-full p-4 bg-slate-50 border rounded-xl outline-none transition-all text-sm ${
-                          isMentorMissingLink
-                            ? "border-red-400"
-                            : "border-slate-200 focus:border-indigo-600"
-                        }`}
-                      />
-                      {isMentorMissingLink && (
-                        <p className="text-[10px] text-red-500 font-bold ml-1 uppercase tracking-tighter">
-                          Link is required for mentors
-                        </p>
-                      )}
-                    </div>
-                  )}
-    
-                  {/* Bio (Optional) */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between items-center px-1">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        Professional Bio
-                      </label>
-                      <span className="text-[9px] font-bold text-slate-300 uppercase">Optional</span>
-                    </div>
-                    <textarea
-                      name="bio"
-                    
-                      placeholder="Share your expertise and how you can help students..."
-                      onChange={handleValue}
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all text-sm resize-none"
-                    />
-                  </div>
-    
-                  {/* Informational Tooltip */}
-                  {inputs.socialPlatform && (
-                    <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-[11px] text-indigo-700 leading-tight">
-                      <span className="font-bold">Pro Tip:</span> Your <span className="capitalize">{inputs.socialPlatform}</span> link will be visible to students for direct networking.
-                    </div>
-                  )}
-                </div>
+                  <InputGroup label="Profile URL" name="profileLink" onChange={handleValue} placeholder="https://linkedin.com/in/..." />
+                </motion.div>
               )}
-    
-              {/* Password */}
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                  Password
-                </label>
-                <input
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  onChange={handleValue}
-                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all"
-                />
-              </div>
-    
-              {/* Submit Button */}
-              <button
-                onClick={Signup}
-                disabled={isMentorInvalid}
-                className={`w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px]
-                  transition-all duration-300 shadow-2xl active:scale-[0.98]
-                  ${
-                    isMentorInvalid
-                      ? "bg-slate-300 cursor-not-allowed text-slate-500"
-                      : "bg-slate-900 hover:bg-indigo-600 text-white shadow-indigo-100"
-                  }`}
+            </AnimatePresence>
+
+            {/* Password */}
+            <div className="relative">
+              <InputGroup 
+                label="Password" 
+                name="password" 
+                type={showPassword ? "text" : "password"} 
+                onChange={handleValue} 
+                placeholder="••••••••" 
+                icon={<Lock size={14}/>} 
+              />
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-[34px] text-slate-500 hover:text-white transition-colors"
               >
-                Create Account
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
-    
+            </div>
+
+            <button
+              onClick={onSignup}
+              disabled={isMentorInvalid || isLoading}
+              className="w-full mt-4 py-3.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-500 transition-all duration-300 flex items-center justify-center gap-2 group shadow-lg shadow-indigo-600/20 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <span>Create Account</span>
+                  <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
+            
+            <p className="text-center text-xs text-slate-500 mt-6">
+              Already have an account? <a href="#" className="text-indigo-400 hover:text-indigo-300 font-medium">Sign in</a>
+            </p>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* RIGHT SIDE: Visual Brand Section */}
+      <div className="hidden lg:flex flex-1 bg-[#0a0a0a] relative items-center justify-center p-12">
+        {/* Subtle Grid Background */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+        
+        <div className="relative z-10 w-full max-w-lg">
+          <div className="space-y-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-widest">
+              <Sparkles size={12} /> New Mentorship Program 2024
+            </div>
+            
+            <h2 className="text-5xl font-bold leading-tight tracking-tight text-white">
+              Bridge the gap between <br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">Learning and Career.</span>
+            </h2>
+
+            <div className="grid grid-cols-2 gap-6 pt-8">
+              <StatCard title="12k+" subtitle="Active Students" />
+              <StatCard title="850+" subtitle="Verified Mentors" />
             </div>
           </div>
         </div>
-    
-        {/* RIGHT SIDE: Marketing/Visual */}
-        <div className="hidden lg:flex bg-slate-50 items-center justify-center p-12">
-          <div className="bg-white p-12 rounded-[3.5rem] shadow-2xl border border-slate-100 max-w-sm">
-            <h2 className="text-3xl font-black tracking-tighter leading-tight">
-              The standard for <br />
-              <span className="text-indigo-600">
-                Educational <br /> Networking.
-              </span>
-            </h2>
-            <div className="mt-6 h-1.5 w-12 bg-indigo-600 rounded-full"></div>
-            <p className="mt-6 text-slate-400 text-sm font-medium leading-relaxed">
-              Join a community of students and mentors dedicated to mutual growth and career success.
-            </p>
-          </div>
-        </div>
-    
       </div>
-    );
+
+      <style jsx>{`
+        .custom-input {
+          @apply w-full h-12 px-4 bg-white/[0.03] border border-white/10 rounded-xl outline-none transition-all 
+                 text-sm placeholder:text-slate-600 focus:border-indigo-500/50 focus:bg-white/[0.05]
+                 focus:ring-4 focus:ring-indigo-500/10;
+        }
+        .custom-select {
+          @apply w-full h-12 px-4 bg-white/[0.03] border border-white/10 rounded-xl outline-none transition-all 
+                 text-sm text-slate-400 focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10;
+        }
+      `}</style>
+    </div>
+  );
 }
+
+// Sub-component for clean Input Groups
+function InputGroup({ label, icon, ...props }: any) {
+  return (
+    <div className="flex flex-col gap-1.5 w-full">
+      <label className="text-[11px] font-semibold text-slate-500 uppercase ml-1 tracking-wider">{label}</label>
+      <div className="relative">
+        {icon && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600">{icon}</div>}
+        <input className={`custom-input ${icon ? 'pl-10' : ''}`} {...props} />
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ title, subtitle }: { title: string, subtitle: string }) {
+  return (
+    <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-sm">
+      <div className="text-2xl font-bold text-white mb-1">{title}</div>
+      <div className="text-xs text-slate-500 font-medium uppercase tracking-wider">{subtitle}</div>
+    </div>
+  );
+} 

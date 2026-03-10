@@ -5,6 +5,17 @@ import { useAuth } from "@/app/provider/authProvider";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { 
+  Calendar, 
+  Plus, 
+  ChevronRight, 
+  GraduationCap, 
+  LayoutDashboard, 
+  ArrowUpRight,
+  Settings2,
+  Activity
+} from "lucide-react";
 
 type Course = {
   id: string;
@@ -17,180 +28,178 @@ const Page = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const { user: clerkUser } = useUser();
   const { user } = useAuth(clerkUser?.id);
-
   const { push } = useRouter();
 
   const fetchCourses = async () => {
     if (!user?.id) return;
-
     const data = await fetch(`/api/course/findSpecificCourse/${user.id}`, {
       method: "GET",
-      cache: "no-store",
     });
-
     if (!data.ok) {
       setCourses([]);
       return;
     }
-
     const res = (await data.json()) as Course[];
     setCourses(Array.isArray(res) ? res : []);
   };
 
   useEffect(() => {
     if (user?.id) fetchCourses();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   return (
-    <div className="min-h-screen flex bg-[#f8fafc] overflow-hidden font-sans">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#020202] text-slate-200 selection:bg-indigo-500/30 font-sans antialiased">
+      {/* Background Atmosphere */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-indigo-200/40 blur-[120px] animate-pulse" />
-        <div className="absolute top-[20%] -right-[5%] w-[30%] h-[30%] rounded-full bg-sky-200/40 blur-[100px]" />
-        <div className="absolute -bottom-[10%] left-[20%] w-[50%] h-[40%] rounded-full bg-violet-200/30 blur-[120px]" />
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[10%] left-[-5%] w-[30%] h-[30%] bg-purple-600/5 blur-[120px] rounded-full" />
       </div>
 
-     <MentorSideBar
-                home={() => push("/mentor/dashboard")}
-                chat={() => push("/mentor/chat")}
-                account={() => push("/mentor/dashboard/accounts")}
-                editProfile={()=>push("/mentor/dashboard/editProfile")}
-              /> 
-      <main className="flex-1 relative z-10 flex flex-col p-6 md:p-10 gap-8 overflow-y-auto">
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
-              Expert{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">
-                Console
-              </span>
+      <MentorSideBar
+        activeTab="home"
+        home={() => push("/mentor/dashboard")}
+        chat={() => push("/mentor/chat")}
+        account={() => push("/mentor/dashboard/accounts")}
+        editProfile={() => push("/mentor/dashboard/editProfile")}
+      />
+
+      <main className="flex-1 p-6 sm:p-10 md:p-16 z-10 relative overflow-y-auto no-scrollbar">
+        {/* Header Section */}
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-indigo-400 font-bold text-[10px] tracking-[0.3em] uppercase">
+              <Activity size={14} /> System Status: Online
+            </div>
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tighter text-white uppercase">
+              Expert <span className="text-indigo-500">Console</span>
             </h1>
-            <p className="text-slate-500 font-medium mt-1">
-              Empowering the next generation of talent.
+            <p className="text-zinc-500 text-sm font-medium max-w-sm leading-relaxed">
+              Unified interface for curriculum deployment and session synchronization.
             </p>
           </div>
 
           <button
             onClick={() => push("/mentor/dashboard/createCourse")}
-            className="group relative inline-flex items-center justify-center px-8 py-3.5 font-semibold text-white transition-all duration-200 bg-indigo-600 rounded-2xl hover:bg-indigo-700 focus:outline-none shadow-[0_10px_20px_-10px_rgba(79,70,229,0.6)]"
+            className="group flex items-center justify-center gap-3 px-8 py-4 bg-white text-black rounded-2xl font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-indigo-600 hover:text-white transition-all active:scale-95 shadow-2xl shadow-white/5"
           >
-            <span className="mr-2 text-xl">+</span> New Course
+            <Plus size={18} /> New Curriculum
           </button>
         </header>
 
-        <div className="grid grid-cols-12 gap-8">
-          <div className="col-span-12 lg:col-span-8 space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+          
+          {/* Primary Quick Actions */}
+          <div className="xl:col-span-4 space-y-6">
+             <div className="flex items-center gap-2 text-zinc-500 font-bold text-[10px] uppercase tracking-widest mb-2 ml-2">
+               Quick Access
+             </div>
+             
+             <motion.div
+                whileHover={{ y: -4 }}
                 onClick={() => push("/mentor/reservation")}
-                className="cursor-pointer group p-8 rounded-[32px] bg-white/60 backdrop-blur-xl border border-white/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                className="group cursor-pointer p-8 rounded-[2.5rem] bg-zinc-900/50 border border-white/5 hover:border-indigo-500/30 transition-all duration-500 shadow-2xl"
               >
-                <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
+                <div className="w-12 h-12 bg-white text-black rounded-2xl flex items-center justify-center mb-10 transition-transform group-hover:scale-110">
+                  <Calendar size={22} />
                 </div>
-                <h3 className="text-xl font-bold text-slate-800">
-                  Student Reservations
-                </h3>
-                <p className="text-slate-500 text-sm mt-2">
-                  Manage your upcoming bookings and student meetings.
+                <h3 className="text-2xl font-bold text-white tracking-tight uppercase">Reservations</h3>
+                <p className="text-zinc-500 text-xs mt-3 leading-relaxed font-medium">
+                  Review and authorize student booking requests.
                 </p>
-              </div>
-
-              <div className="p-8 rounded-[32px] bg-white/60 backdrop-blur-xl border border-white/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
-                  <svg
-                    className="w-6 h-6 text-emerald-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                    />
-                  </svg>
+                <div className="mt-8 flex items-center text-indigo-400 font-bold text-[9px] uppercase tracking-[0.2em]">
+                  Manage Schedule <ArrowUpRight size={14} className="ml-1 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-800">
-                  Course Analytics
-                </h3>
-                <p className="text-slate-500 text-sm mt-2">
-                  Track performance and engagement across your content.
-                </p>
-              </div>
-            </div>
+              </motion.div>
 
-            <div className="relative overflow-hidden rounded-[40px] p-10 bg-slate-900 text-white shadow-2xl">
-              <div className="relative z-10">
-                <span className="px-4 py-1.5 bg-indigo-500/20 text-indigo-300 text-xs font-bold rounded-full border border-indigo-500/30 uppercase tracking-widest">
-                  Growth Tip
-                </span>
-                <h2 className="text-3xl font-bold mt-6 mb-4">
-                  Host a Live Workshop
-                </h2>
-                <p className="text-slate-400 max-w-md leading-relaxed mb-8">
-                  Increase your student engagement by 40% by hosting a live Q&A
-                  session this week.
-                </p>
-                <button className="px-6 py-3 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-100 transition-colors">
-                  Schedule Now
+              <div className="p-8 rounded-[2.5rem] bg-zinc-900/20 border border-white/5">
+                <Settings2 size={20} className="text-zinc-500 mb-6" />
+                <h3 className="text-lg font-bold text-white uppercase tracking-tight">Node Settings</h3>
+                <p className="text-zinc-500 text-[11px] mt-2 font-medium">Configure transmission preferences and bio data.</p>
+                <button 
+                  onClick={() => push("/mentor/dashboard/accounts")}
+                  className="mt-6 w-full py-3 bg-white/5 hover:bg-white hover:text-black rounded-xl text-[9px] font-bold uppercase tracking-widest transition-all"
+                >
+                  Manage Profile
                 </button>
               </div>
-
-              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/20 rounded-full blur-[80px] -mr-20 -mt-20" />
-              <div className="absolute bottom-0 right-20 w-32 h-32 bg-violet-500/20 rounded-full blur-[60px]" />
-            </div>
           </div>
 
-          <div className="col-span-12 lg:col-span-4 space-y-6">
-            <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-[32px] p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center justify-between">
-                Active Courses
-                <span className="text-xs bg-slate-200 text-slate-600 px-2.5 py-1 rounded-lg font-bold">
-                  {courses.length}
-                </span>
-              </h3>
+          {/* Compact Course Management */}
+          <div className="xl:col-span-8">
+            <div className="bg-[#0a0a0a] border border-white/5 rounded-[3rem] p-8 md:p-12 shadow-2xl h-full">
+              <div className="flex items-center justify-between mb-12">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-indigo-500 font-bold text-[10px] uppercase tracking-[0.2em]">
+                    <GraduationCap size={14} /> Portfolio
+                  </div>
+                  <h2 className="text-2xl font-bold text-white uppercase">Active Curriculum</h2>
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-3xl font-bold text-white leading-none tracking-tighter">{courses.length}</span>
+                  <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mt-1">Total Active</span>
+                </div>
+              </div>
 
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {courses.map((course) => (
-                  <button
+                  <motion.div
                     key={course.id}
-                    onClick={() =>
-                      push(`/mentor/dashboard/courseDates/${course.id}`)
-                    }
-                    className="w-full group flex items-center gap-4 p-4 rounded-2xl bg-white/50 border border-transparent hover:border-indigo-200 hover:bg-white hover:shadow-md transition-all duration-200"
+                    whileHover={{ scale: 0.98 }}
+                    onClick={() => push(`/mentor/dashboard/courseDates/${course.id}`)}
+                    className="group cursor-pointer flex items-center gap-5 p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-indigo-500/40 hover:bg-white/[0.04] transition-all"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-50 to-violet-50 flex items-center justify-center font-bold text-indigo-600 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 shrink-0 rounded-xl bg-zinc-800 border border-white/5 flex items-center justify-center font-bold text-lg text-zinc-400 group-hover:text-white transition-all">
                       {course.courseTitle?.charAt(0) ?? "C"}
                     </div>
-                    <div className="flex-1 text-left">
-                      <p className="font-bold text-slate-700 group-hover:text-indigo-600 transition-colors truncate">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-white text-[14px] truncate uppercase tracking-tight group-hover:text-indigo-400 transition-colors">
                         {course.courseTitle}
                       </p>
-                      <p className="text-xs text-slate-400">
-                        Manage dates &amp; curriculum
-                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">
+                          ${course.paymentValue || "0.00"}
+                        </span>
+                        <div className="h-1 w-1 rounded-full bg-zinc-800" />
+                        <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest truncate">Manage Node</span>
+                      </div>
                     </div>
-                  </button>
+                    <ChevronRight size={16} className="text-zinc-800 group-hover:text-white transition-colors" />
+                  </motion.div>
                 ))}
+                
+                {courses.length === 0 && (
+                  <div className="col-span-2 py-20 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-[2.5rem]">
+                    <p className="text-zinc-700 text-[10px] font-bold uppercase tracking-[0.4em] mb-6">No Active Curriculums</p>
+                    <button 
+                      onClick={() => push("/mentor/dashboard/createCourse")}
+                      className="px-6 py-3 bg-white text-black rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all"
+                    >
+                      Initialize Unit
+                    </button>
+                  </div>
+                )}
+
+                {/* Compact Add Button */}
+                {courses.length > 0 && (
+                   <motion.div
+                    onClick={() => push("/mentor/dashboard/createCourse")}
+                    className="flex items-center justify-center p-5 rounded-2xl border border-dashed border-white/5 hover:border-indigo-500/20 hover:bg-indigo-500/5 cursor-pointer transition-all"
+                  >
+                    <div className="flex items-center gap-3 text-zinc-600 font-bold text-[9px] uppercase tracking-widest">
+                      <Plus size={14} /> Add New Entry
+                    </div>
+                  </motion.div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </main>
+
+      <style jsx global>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </div>
   );
 };
