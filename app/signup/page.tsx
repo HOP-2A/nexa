@@ -28,6 +28,7 @@ export default function SignupPage() {
 
   const setRole = (role: string) => setInputs((prev) => ({ ...prev, role }));
 
+  
   const onSignup = async () => {
     setIsLoading(true);
     // Simulate API call delay for UX
@@ -35,6 +36,15 @@ export default function SignupPage() {
         setIsLoading(false);
         // router.push("/success"); 
     }, 1500);
+    const res = await fetch("/api/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(inputs),
+    });
+
+    if (res.ok) {
+      router.push("https://patient-alien-39.accounts.dev/sign-in");
+    }
   };
 
   const isMentorInvalid = inputs.role === "MENTOR" && (!inputs.socialPlatform || !inputs.profileLink);
