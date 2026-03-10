@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/carousel"
 import SideBar from "@/app/_component/sideBar"
 import { Badge } from "@/components/ui/badge"
-import { ArrowRight, BookOpen, User, Star } from "lucide-react"
+import { ArrowRight, BookOpen, User, Star, Globe, Zap, ShieldCheck } from "lucide-react"
+import { motion } from "framer-motion"
 
 const Page = () => {
   const [mentor, setMentor] = useState<any>()
@@ -37,24 +38,20 @@ const Page = () => {
     fetchMentorData()
   }, [mentorId])
 
-  // Logic to render stars based on numeric rating
-  const renderStars = (rating: number | null) => {
-    const stars = [];
-    const currentRating = rating || 0;
-    
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <Star 
-          key={i} 
-          className={`w-4 h-4 ${i <= currentRating ? "fill-amber-400 text-amber-400" : "text-slate-600"}`} 
-        />
-      );
-    }
-    return stars;
-  };
+  const renderStars = (rating?: string) => {
+    const ratingMap: any = { FIVE: 5, FOUR: 4, THREE: 3, TWO: 2, ONE: 1, NONE: 0 }
+    const ratingNumber = ratingMap[rating || "NONE"]
+    return [...Array(5)].map((_, i) => (
+      <Star
+        key={i}
+        size={14}
+        className={`${i < ratingNumber ? "text-indigo-500 fill-indigo-500" : "text-zinc-800 fill-zinc-800"}`}
+      />
+    ))
+  }
 
   return (
-    <div className="relative min-h-screen flex bg-white text-slate-900 selection:bg-indigo-100 selection:text-indigo-700">
+    <div className="min-h-screen flex bg-[#020202] text-zinc-100 selection:bg-indigo-500/30">
       
       <SideBar
         home={() => push("/student/dashboard")}
@@ -63,110 +60,132 @@ const Page = () => {
         news={() => push("/student/news")}
       />
 
-      <main className="flex-1 relative z-10 px-6 md:px-12 py-12 lg:ml-20">
-        <div className="max-w-6xl mx-auto space-y-12">
+      <main className="flex-1 relative overflow-hidden">
+        {/* Atmospheric Glow */}
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/10 blur-[150px] -z-10 rounded-full" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-600/5 blur-[120px] -z-10 rounded-full" />
+
+        <div className="max-w-7xl mx-auto px-6 md:px-12 py-12 space-y-20">
           
-          {/* --- Mentor Header --- */}
-          <section className="relative">
-            <div className="relative bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 md:p-12 shadow-xl">
-              <div className="flex flex-col md:flex-row items-center gap-10">
-                
-                {/* Avatar */}
-                <div className="relative">
-                  <div className="h-40 w-40 rounded-3xl overflow-hidden ring-1 ring-slate-700 p-1 bg-slate-800 shadow-2xl flex items-center justify-center">
+          {/* MENTOR HERO SECTION */}
+          <motion.section 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              
+              {/* Profile Image (Portrait Style) */}
+              <div className="lg:col-span-4 flex justify-center lg:justify-start">
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                  <div className="relative h-[450px] w-full md:w-[350px] bg-zinc-900 rounded-[2.5rem] overflow-hidden border border-white/5 grayscale hover:grayscale-0 transition-all duration-700">
                     {mentor?.profilePic ? (
-                      <img
-                        src={mentor.profilePic}
-                        className="h-full w-full object-cover rounded-[1.25rem]"
-                        alt="Profile"
-                      />
+                      <img src={mentor.profilePic} className="h-full w-full object-cover" alt="Mentor" />
                     ) : (
-                      <div className="h-full w-full bg-slate-700 rounded-[1.25rem] flex items-center justify-center">
-                        <User className="w-16 h-16 text-slate-500" />
+                      <div className="h-full w-full flex items-center justify-center bg-zinc-800">
+                        <User size={80} className="text-zinc-700" />
                       </div>
                     )}
+                    {/* Floating Info Tag */}
+                    <div className="absolute bottom-6 left-6 right-6 p-4 bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl">
+                       <div className="flex items-center gap-2 mb-1">
+                          <ShieldCheck size={14} className="text-indigo-400" />
+                          <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Verified Expert</span>
+                       </div>
+                       <div className="flex items-center gap-1">{renderStars(mentor?.rating)}</div>
+                    </div>
                   </div>
                 </div>
+              </div>
 
-                <div className="flex-1 text-center md:text-left space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
-                      <Badge variant="outline" className="w-fit mx-auto md:mx-0 text-indigo-400 border-indigo-400/30 bg-indigo-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest">
-                        Mentor Profile
-                      </Badge>
-                      
-                      {/* Dynamic Rating Logic */}
-                      <div className="flex items-center justify-center md:justify-start gap-1">
-                        {renderStars(mentor?.rating)}
-                        {mentor?.rating ? (
-                           <span className="ml-2 text-xs font-bold text-slate-400">{mentor.rating}</span>
-                        ) : (
-                           <span className="ml-2 text-[10px] font-bold text-slate-500 uppercase tracking-tighter italic">No ratings yet</span>
-                        )}
-                      </div>
-                    </div>
+              {/* Bio & Stats */}
+              <div className="lg:col-span-8 space-y-8 text-center lg:text-left">
+                <div className="space-y-4">
+                  <Badge className="bg-white/5 text-zinc-400 border-white/10 px-4 py-1 uppercase tracking-[0.2em] text-[10px] rounded-full">
+                    Executive Mentor
+                  </Badge>
+                  <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white uppercase italic leading-none">
+                    {mentor?.firstname} <br />
+                    <span className="text-indigo-600">{mentor?.lastname}</span>
+                  </h1>
+                </div>
 
-                    <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-none">
-                      {mentor?.firstname} <span className="text-slate-500">{mentor?.lastname}</span>
-                    </h1>
+                <p className="text-zinc-400 text-lg md:text-xl font-medium max-w-2xl leading-relaxed">
+                  Leading specialized industry tracks through strategic architecture and high-performance design. Join {mentor?.firstname}'s inner circle to master advanced concepts.
+                </p>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-8 border-t border-white/5">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Students</p>
+                    <p className="text-2xl font-bold text-white tracking-tighter">1.2k+</p>
                   </div>
-
-                  <p className="text-slate-400 text-lg leading-relaxed max-w-2xl font-light">
-                
-                  </p>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Industry</p>
+                    <p className="text-2xl font-bold text-white tracking-tighter">Tech Arch</p>
+                  </div>
+                  <div className="space-y-1 hidden md:block">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Language</p>
+                    <p className="text-2xl font-bold text-white tracking-tighter">EN / DE</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </section>
+          </motion.section>
 
-          {/* --- Available Courses --- */}
-          <section className="space-y-8">
-            <div className="flex items-center gap-3 px-2">
-              <div className="h-8 w-2 bg-indigo-600 rounded-full"></div>
-              <h2 className="text-3xl font-black text-slate-900 tracking-tight">Active Courses</h2>
+          {/* COURSE TRACKS SECTION */}
+          <section className="space-y-10">
+            <div className="flex items-end justify-between px-2">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-indigo-500 font-bold text-[10px] tracking-[0.3em] uppercase">
+                  <Zap size={14} /> Knowledge Tracks
+                </div>
+                <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic">
+                  Active Modules<span className="text-indigo-600">.</span>
+                </h2>
+              </div>
             </div>
 
-            <Carousel className="w-full relative">
+            <Carousel className="w-full relative group">
               <CarouselContent className="-ml-6">
-                {courses?.map((cs: any) => (
-                  <CarouselItem
-                    key={cs.id}
-                    className="pl-6 basis-full sm:basis-1/2 lg:basis-1/3"
-                  >
-                    <div
+                {courses?.map((cs: any, idx) => (
+                  <CarouselItem key={cs.id} className="pl-6 basis-full sm:basis-1/2 lg:basis-1/3">
+                    <motion.div
+                      whileHover={{ y: -10 }}
                       onClick={() => push(`/student/mentorProfile/${mentorId}/${cs.id}`)}
-                      className="group cursor-pointer relative h-full bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] transition-all duration-300 hover:border-indigo-500/50 hover:shadow-2xl"
+                      className="cursor-pointer bg-zinc-900/50 border border-white/5 p-8 rounded-[2.5rem] hover:bg-zinc-900 hover:border-indigo-500/50 transition-all duration-500 group/card h-full flex flex-col justify-between"
                     >
-                      <div className="mb-12 flex justify-between items-start">
-                        <div className="p-4 bg-slate-800 rounded-2xl text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
-                          <BookOpen className="w-6 h-6" />
+                      <div>
+                        <div className="flex justify-between items-start mb-12">
+                          <div className="p-4 bg-indigo-500/10 rounded-2xl text-indigo-500 group-hover/card:bg-indigo-600 group-hover/card:text-white transition-all">
+                            <BookOpen size={24} />
+                          </div>
+                          <div className="h-10 w-10 flex items-center justify-center rounded-full border border-white/10 group-hover/card:border-white transition-all">
+                            <ArrowRight size={18} className="text-zinc-600 group-hover/card:text-white" />
+                          </div>
                         </div>
-                        <div className="w-10 h-10 flex items-center justify-center rounded-full border border-slate-700 group-hover:border-white transition-colors">
-                          <ArrowRight className="w-5 h-5 text-slate-600 group-hover:text-white transition-all" />
-                        </div>
+
+                        <h3 className="text-2xl font-bold text-white mb-4 uppercase tracking-tighter italic leading-tight group-hover/card:text-indigo-400">
+                          {cs.courseTitle}
+                        </h3>
+                        <p className="text-zinc-500 text-sm font-medium leading-relaxed line-clamp-3">
+                          Access exclusive technical curriculum and mentorship frameworks under the guidance of {mentor?.firstname}.
+                        </p>
                       </div>
 
-                      <h3 className="text-2xl font-bold text-white mb-4 leading-tight group-hover:text-indigo-300 transition-colors">
-                        {cs.courseTitle}
-                      </h3>
-                      
-                      <p className="text-slate-400 text-sm font-light leading-relaxed mb-6 line-clamp-3">
-                        View details for this specialized track under {mentor?.firstname}'s guidance.
-                      </p>
-
-                      <div className="pt-6 border-t border-slate-800/50">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 group-hover:text-indigo-400 transition-colors">
-                          Syllabus Details
-                        </span>
+                      <div className="pt-8 mt-8 border-t border-white/5 flex justify-between items-center">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 group-hover/card:text-indigo-400">Track Module {idx + 1}</span>
+                        <Globe size={14} className="text-zinc-700" />
                       </div>
-                    </div>
+                    </motion.div>
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              
-              <div className="flex gap-4 mt-10 md:justify-end">
-                <CarouselPrevious className="static translate-y-0 h-12 w-12 border-slate-200 bg-white text-slate-900 hover:bg-slate-900 hover:text-white transition-all" />
-                <CarouselNext className="static translate-y-0 h-12 w-12 border-slate-200 bg-white text-slate-900 hover:bg-slate-900 hover:text-white transition-all" />
+
+              {/* Enhanced Controls */}
+              <div className="flex gap-4 mt-12 md:justify-end">
+                <CarouselPrevious className="static translate-y-0 h-14 w-14 rounded-2xl border-white/5 bg-zinc-900 text-zinc-400 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all" />
+                <CarouselNext className="static translate-y-0 h-14 w-14 rounded-2xl border-white/5 bg-zinc-900 text-zinc-400 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all" />
               </div>
             </Carousel>
           </section>

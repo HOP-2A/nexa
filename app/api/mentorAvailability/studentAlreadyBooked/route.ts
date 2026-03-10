@@ -5,18 +5,16 @@ export async function POST(
   req: NextRequest
 ) {
 const body = await req.json()
-if(body.date === undefined){
-  return NextResponse.json("select your date");
-}
-else{
 const allDates =  await prisma.mentorAvailability.findMany({
 where:{
-  courseId:body.courseId,
-  availableDate:body.date
-
+ studentId:body.studentId,
+ status:"BOOKED"
+},
+include:{
+  student:true
 }
 })
 return NextResponse.json(allDates);
-}
+
 
 }
