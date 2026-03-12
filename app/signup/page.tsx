@@ -31,10 +31,9 @@ export default function SignupPage() {
   
   const onSignup = async () => {
     setIsLoading(true);
-    // Simulate API call delay for UX
+
     setTimeout(() => {
-        setIsLoading(false);
-        // router.push("/success"); 
+      
     }, 1500);
     const res = await fetch("/api/signup", {
       method: "POST",
