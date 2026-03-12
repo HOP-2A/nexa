@@ -126,10 +126,6 @@ const Page = () => {
               </h1>
               <p className="text-slate-400 text-sm mt-2 font-normal">Тавтай морил. Таны суралцах явц хэвийн үргэлжилж байна.</p>
             </div>
-            <div className="flex items-center gap-3 bg-white/[0.03] border border-white/10 px-4 py-2 rounded-2xl backdrop-blur-md self-start">
-              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Систем: Идэвхтэй</span>
-            </div>
           </div>
         </header>
 
