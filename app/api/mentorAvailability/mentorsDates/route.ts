@@ -12,8 +12,8 @@ else{
 const allDates =  await prisma.mentorAvailability.findMany({
 where:{
   courseId:body.courseId,
-  availableDate:body.date
-
+  availableDate:body.date,
+  status:"AVAILABLE"
 }
 })
 return NextResponse.json(allDates);

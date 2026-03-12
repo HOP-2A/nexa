@@ -1,15 +1,24 @@
 "use client";
 
-import { SignInButton } from "@clerk/nextjs";
+import { SignInButton, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ChevronRight, Users, Zap, Calendar, Sparkles, ArrowRight, Github, Twitter } from "lucide-react";
+import { useEffect } from "react";
+import { User } from "@clerk/nextjs/server";
 
 const Page = () => {
   const router = useRouter();
+  const { user} = useUser();
+ 
 
-  // Navigation Helper
   const goToSignup = () => router.push("/signup");
+  useEffect(()=>{
+    if(user){
+router.push("/student/dashboard")
+    }
+
+  },[user])
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-indigo-500/30 overflow-x-hidden">
@@ -27,11 +36,7 @@ const Page = () => {
             <span className="text-xl font-bold tracking-tighter uppercase italic">Nexa</span>
           </div>
           
-          <div className="hidden md:flex items-center gap-8 text-[11px] font-bold uppercase tracking-widest text-slate-500">
-            <a href="#" className="hover:text-white transition-colors">Features</a>
-            <a href="#" className="hover:text-white transition-colors">Solutions</a>
-            <a href="#" className="hover:text-white transition-colors">Community</a>
-          </div>
+        
 
           <div className="flex items-center gap-5">
             <div className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white cursor-pointer transition-colors">
